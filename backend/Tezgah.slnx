@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Tezgah.Api/Tezgah.Api.csproj" />
+    <Project Path="src/Tezgah.Application/Tezgah.Application.csproj" />
+    <Project Path="src/Tezgah.Contracts/Tezgah.Contracts.csproj" />
+    <Project Path="src/Tezgah.Domain/Tezgah.Domain.csproj" />
+    <Project Path="src/Tezgah.Infrastructure/Tezgah.Infrastructure.csproj" />
+    <Project Path="src/Tezgah.Notifications/Tezgah.Notifications.csproj" />
+    <Project Path="src/Tezgah.Payments/Tezgah.Payments.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Tezgah.Notifications.Tests/Tezgah.Notifications.Tests.csproj" />
+    <Project Path="tests/Tezgah.Payments.Tests/Tezgah.Payments.Tests.csproj" />
+    <Project Path="tests/Tezgah.UnitTests/Tezgah.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Tezgah.Bolum/Tezgah.Bolum.csproj" />
+    <Project Path="tools/Tezgah.DataGen/Tezgah.DataGen.csproj" />
+  </Folder>
+</Solution>

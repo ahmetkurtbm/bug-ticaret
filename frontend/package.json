@@ -1,0 +1,14 @@
+{
+  "name": "tezgah-frontend",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:storefront": "npm run dev -w storefront",
+    "dev:seller": "npm run dev -w seller",
+    "dev:admin": "npm run dev -w admin",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces --if-present"
+  }
+}

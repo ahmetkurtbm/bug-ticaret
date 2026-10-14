@@ -1,0 +1,174 @@
+# Tezgah geliştirme ortamı.
+#
+#   docker compose up -d                  → yalnızca altyapı: Postgres, Redis, RabbitMQ, Mailpit
+#                                           (servisler ve arayüzler yerelde: dotnet run / npm run dev)
+#   docker compose --profile app up -d --build
+#                                         → her şey container'da: API, Ödeme, Bildirim, üç arayüz
+#                                           ve ilk açılışta örnek veri (small profil)
+#
+# İkisini aynı anda çalıştırmayın: aynı portları kullanırlar (5080, 5090, 5095, 5173-5175).
+#
+# Container içinde "localhost" container'ın kendisidir. Servisler birbirine servis adıyla ulaşır
+# (http://payments:8080). Tarayıcı ise bilgisayarın portlarından ulaşır (http://localhost:5080).
+
+name: tezgah
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: tezgah
+      POSTGRES_PASSWORD: tezgah
+      POSTGRES_DB: tezgah
+    ports:
+      - "5440:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tezgah -d tezgah"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6390:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: tezgah
+      RABBITMQ_DEFAULT_PASS: tezgah
+    ports:
+      - "5680:5672"
+      - "15680:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  # ---------------------------------------------------------------- uygulama (profile: app)
+  api:
+    profiles: ["app"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        PROJECT: src/Tezgah.Api
+        APP_DLL: Tezgah.Api.dll
+    environment: &dotnet-env
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Tezgah: Host=postgres;Port=5432;Database=tezgah;Username=tezgah;Password=tezgah
+      Database__MigrateOnStartup: "true"
+      Payments__BaseUrl: http://payments:8080
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__Port: "5672"
+    ports:
+      - "5080:8080"
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    healthcheck: &dotnet-health
+      test: ["CMD", "curl", "-fsS", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  payments:
+    profiles: ["app"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        PROJECT: src/Tezgah.Payments
+        APP_DLL: Tezgah.Payments.dll
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Payments: Host=postgres;Port=5432;Database=tezgah_payments;Username=tezgah;Password=tezgah
+      Payments__WebhookUrl: http://api:8080/api/payments/webhook
+      # Müşterinin tarayıcısı ödeme sayfasını bu adresten açar.
+      Payments__PublicBaseUrl: http://localhost:5090
+    ports:
+      - "5090:8080"
+    depends_on:
+      postgres: { condition: service_healthy }
+    healthcheck: *dotnet-health
+
+  notifications:
+    profiles: ["app"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        PROJECT: src/Tezgah.Notifications
+        APP_DLL: Tezgah.Notifications.dll
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Notifications: Host=postgres;Port=5432;Database=tezgah_notifications;Username=tezgah;Password=tezgah
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__Port: "5672"
+      Smtp__Host: mailpit
+      Smtp__Port: "1025"
+    ports:
+      - "5095:8080"
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    healthcheck: *dotnet-health
+
+  # Şema API açılırken uygulanır; veri üretici ondan sonra çalışır. Veri varsa dokunmadan çıkar.
+  seed:
+    profiles: ["app"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        PROJECT: tools/Tezgah.DataGen
+        APP_DLL: Tezgah.DataGen.dll
+    command: ["--profile", "small", "--connection", "Host=postgres;Port=5432;Database=tezgah;Username=tezgah;Password=tezgah"]
+    depends_on:
+      api: { condition: service_healthy }
+    restart: "no"
+
+  storefront:
+    profiles: ["app"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args: { APP: storefront }
+    ports:
+      - "5173:80"
+
+  seller:
+    profiles: ["app"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args: { APP: seller }
+    ports:
+      - "5174:80"
+
+  admin:
+    profiles: ["app"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args: { APP: admin }
+    ports:
+      - "5175:80"
+
+volumes:
+  pgdata:

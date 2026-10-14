@@ -1,0 +1,23 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+
+# Node
+node_modules/
+dist/
+*.local
+
+# Editör ve işletim sistemi
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Araç dosyaları
+.impeccable/
+.claude/
+AGENTS.md
+CLAUDE.md

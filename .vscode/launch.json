@@ -1,0 +1,76 @@
+{
+  // F5 menüsünden "Tüm backend" seçilirse API, Ödeme ve Bildirim servisleri birlikte hata ayıklayıcıyla açılır.
+  // Gerekli eklenti: C# Dev Kit (ms-dotnettools.csdevkit). Tarayıcı tarafı için "Müşteri sitesi (Chrome)".
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "API (monolit)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build: backend",
+      "program": "${workspaceFolder}/backend/src/Tezgah.Api/bin/Debug/net10.0/Tezgah.Api.dll",
+      "cwd": "${workspaceFolder}/backend/src/Tezgah.Api",
+      "env": { "ASPNETCORE_ENVIRONMENT": "Development", "ASPNETCORE_URLS": "http://localhost:5080" },
+      "stopAtEntry": false,
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Ödeme servisi",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build: backend",
+      "program": "${workspaceFolder}/backend/src/Tezgah.Payments/bin/Debug/net10.0/Tezgah.Payments.dll",
+      "cwd": "${workspaceFolder}/backend/src/Tezgah.Payments",
+      "env": { "ASPNETCORE_ENVIRONMENT": "Development", "ASPNETCORE_URLS": "http://localhost:5090" },
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Bildirim servisi",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build: backend",
+      "program": "${workspaceFolder}/backend/src/Tezgah.Notifications/bin/Debug/net10.0/Tezgah.Notifications.dll",
+      "cwd": "${workspaceFolder}/backend/src/Tezgah.Notifications",
+      "env": { "ASPNETCORE_ENVIRONMENT": "Development", "ASPNETCORE_URLS": "http://localhost:5095" },
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Veri üretici (small)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build: backend",
+      "program": "${workspaceFolder}/backend/tools/Tezgah.DataGen/bin/Debug/net10.0/Tezgah.DataGen.dll",
+      "args": ["--profile", "small", "--reset"],
+      "cwd": "${workspaceFolder}/backend/tools/Tezgah.DataGen",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Müşteri sitesi (Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend/apps/storefront"
+    },
+    {
+      "name": "Satıcı paneli (Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5174",
+      "webRoot": "${workspaceFolder}/frontend/apps/seller"
+    },
+    {
+      "name": "Yönetim paneli (Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5175",
+      "webRoot": "${workspaceFolder}/frontend/apps/admin"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Tüm backend",
+      "configurations": ["API (monolit)", "Ödeme servisi", "Bildirim servisi"],
+      "stopAll": true
+    }
+  ]
+}

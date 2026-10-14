@@ -1,0 +1,94 @@
+# Tezgah API istekleri. Visual Studio (2022 17.8+) ve VS Code REST Client eklentisi bu dosyayı çalıştırır.
+# Önce "Giriş" isteğini gönderin; sonraki istekler dönen token'ı kullanır.
+
+@api = http://localhost:5080
+@payments = http://localhost:5090
+
+### Sağlık kontrolü
+GET {{api}}/health
+
+### Giriş (müşteri)
+# @name login
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "musteri@tezgah.test", "password": "Tezgah123!" }
+
+@token = {{login.response.body.$.accessToken}}
+
+### Giriş (satıcı)
+# @name sellerLogin
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "satici@tezgah.test", "password": "Tezgah123!" }
+
+@sellerToken = {{sellerLogin.response.body.$.accessToken}}
+
+### Giriş (yönetici)
+# @name adminLogin
+POST {{api}}/api/auth/login
+Content-Type: application/json
+
+{ "email": "admin@tezgah.test", "password": "Tezgah123!" }
+
+@adminToken = {{adminLogin.response.body.$.accessToken}}
+
+### Kategori ağacı
+GET {{api}}/api/categories
+
+### Ürün arama
+GET {{api}}/api/products?q=elbise&sort=price_asc&page=1&pageSize=12
+
+### Sepet
+GET {{api}}/api/cart
+Authorization: Bearer {{token}}
+
+### Sepete ekle
+POST {{api}}/api/cart/items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "variantId": 1, "quantity": 1 }
+
+### Kupon uygula
+PUT {{api}}/api/cart/coupon
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "couponCode": "KARGOBEDAVA" }
+
+### Adreslerim
+GET {{api}}/api/me/addresses
+Authorization: Bearer {{token}}
+
+### Sipariş oluştur (Idempotency-Key aynı kalırsa ikinci istek yeni sipariş açmaz)
+POST {{api}}/api/orders
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Idempotency-Key: 6f1c3a52-0000-4000-8000-000000000001
+
+{ "addressId": 1, "installmentCount": 1 }
+
+### Siparişlerim
+GET {{api}}/api/orders?page=1&pageSize=10
+Authorization: Bearer {{token}}
+
+### Satıcı: özet
+GET {{api}}/api/seller/dashboard
+Authorization: Bearer {{sellerToken}}
+
+### Satıcı: gönderilecek siparişler
+GET {{api}}/api/seller/orders?filter=to_ship
+Authorization: Bearer {{sellerToken}}
+
+### Yönetim: satış raporu (son 30 gün)
+GET {{api}}/api/admin/reports/sales
+Authorization: Bearer {{adminToken}}
+
+### Yönetim: sipariş arama
+GET {{api}}/api/admin/orders?q=musteri@tezgah.test&page=1&pageSize=20
+Authorization: Bearer {{adminToken}}
+
+### Ödeme servisi sağlık kontrolü
+GET {{payments}}/health

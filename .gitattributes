@@ -1,0 +1,5 @@
+# Satır sonları her platformda LF (Docker, bash betikleri, git bisect çıktıları aynı kalsın).
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

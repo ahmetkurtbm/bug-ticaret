@@ -1,0 +1,59 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build: backend",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "${workspaceFolder}/backend/Tezgah.slnx", "/property:GenerateFullPaths=true", "/consoleloggerparameters:NoSummary"],
+      "problemMatcher": "$msCompile",
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "test: backend",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["test", "${workspaceFolder}/backend/Tezgah.slnx"],
+      "problemMatcher": "$msCompile",
+      "group": "test"
+    },
+    {
+      "label": "altyapı: docker compose up",
+      "type": "shell",
+      "command": "docker compose up -d",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "veritabanı: migration uygula",
+      "type": "shell",
+      "command": "dotnet tool restore && dotnet ef database update -p src/Tezgah.Infrastructure -s src/Tezgah.Api",
+      "options": { "cwd": "${workspaceFolder}/backend" },
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend: müşteri sitesi",
+      "type": "npm",
+      "script": "dev:storefront",
+      "path": "frontend",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend: satıcı paneli",
+      "type": "npm",
+      "script": "dev:seller",
+      "path": "frontend",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "frontend: yönetim paneli",
+      "type": "npm",
+      "script": "dev:admin",
+      "path": "frontend",
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
