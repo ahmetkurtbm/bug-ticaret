@@ -20,7 +20,7 @@ public class SellerConfiguration : IEntityTypeConfiguration<Seller>
         b.Property(x => x.City).HasMaxLength(60).IsRequired();
         b.Property(x => x.CommissionRate).HasPrecision(5, 2);
         b.Property(x => x.Rating).HasPrecision(3, 2);
-        b.HasIndex(x => x.OwnerUserId);
+        b.HasIndex(x => x.OwnerUserId).IsUnique(); // bir kullanıcının tek mağazası olur
         b.HasOne<User>().WithMany().HasForeignKey(x => x.OwnerUserId).OnDelete(DeleteBehavior.Restrict);
     }
 }

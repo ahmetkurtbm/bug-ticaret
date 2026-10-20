@@ -29,7 +29,7 @@ public class AdminOrderService(ITezgahDbContext db) : IAdminOrderService
             var term = q.Q.Trim();
             query = term.StartsWith("TZ-", StringComparison.OrdinalIgnoreCase)
                 ? query.Where(o => o.OrderNumber == term.ToUpperInvariant())
-                : query.Where(o => o.User.Email == term.ToLowerInvariant());
+                : query.Where(o => o.User.NormalizedEmail == Common.Text.SlugHelper.NormalizeEmail(term));
         }
 
         var total = await query.CountAsync(ct);

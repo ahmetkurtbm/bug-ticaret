@@ -27,7 +27,7 @@ ve kontrol aracıyla doğrularsınız.
 ## Hızlı başlangıç
 
 ```bash
-git clone <depo-adresi> bug-ticaret && cd bug-ticaret
+git clone https://github.com/ahmetkurtbm/bug-ticaret.git && cd bug-ticaret
 docker compose --profile app up -d --build
 ```
 

@@ -156,6 +156,22 @@ Hedef: ilk sürümde 15-20 bölüm, sonra 50+.
 2. **Sonra:** Bölümleri, ipuçlarını, ilerlemeyi ve çözüm anlatımlarını gösteren bir web sitesi.
    Kod yine öğrencinin bilgisayarında çalışır.
 
+## Durum (2026-11-11)
+
+İlk sürüm tamamlandı:
+
+- [x] **Temel:** Docker Compose, şema (33 tablo), örnek veri üretici (small/medium/large), kimlik doğrulama.
+- [x] **Çekirdek ticaret:** katalog, sepet, kupon, sipariş (idempotent), stok rezervasyonu, sahte ödeme
+      sağlayıcısı ve 3D sayfası, HMAC imzalı webhook, ödenmeyen siparişin iptali.
+- [x] **Pazar yeri:** satıcı başvurusu ve paneli (ürün, varyant, stok, kargolama, özet), yönetim paneli
+      (satıcı ve ürün onayı, siparişler, kampanyalar, satış raporu), komisyon.
+- [x] **Yan sistemler:** outbox + RabbitMQ, Bildirim servisi (Mailpit), Dapper ile eski rapor modülü, Nginx.
+- [x] **Bölümler:** 19 hata dalı, bölüm aracı (`backend/tools/Tezgah.Bolum`), kontroller, kayıt/ipucu/çözüm.
+- [x] **Dokümantasyon:** README, kurulum, mimari, IDE (Visual Studio + VS Code).
+
+Sırada: kargo durumu simülasyonu ve iade, hakediş ekranı, Katalog servisinin ayrılması (strangler fig),
+gözlemlenebilirlik (OpenTelemetry), Redis önbellek, ikinci bölüm grubu, mobil uygulama, videolar.
+
 ## Aşamalar (taslak)
 
 1. **Temel:** Docker Compose, veritabanı şeması, örnek veri üretici (küçük profil), kimlik doğrulama.
@@ -187,14 +203,14 @@ Seçim ölçütü: her seviyeden örnek, en sık karşılaşılanlar önce, ve i
 | 3 | FE-12 | SPA sayfasında yenileyince 404 | 1 | Nginx |
 | 4 | API-01 | 400: doğrulama hatası okunmuyor | 1 | Satıcı başvuru formu |
 | 5 | API-03 | 401 ve 403 karışıklığı | 1 | Satıcı paneli |
-| 6 | NET-01 | CORS politikası çalışmıyor | 1 | Katalog servisi |
+| 6 | NET-01 | CORS politikası çalışmıyor | 1 | API · satıcı paneli |
 | 7 | NET-02 | Middleware sırası | 1 | Bildirim servisi |
 | 8 | NET-03 | NullReferenceException (eski kayıt) | 1 | Fatura/sipariş özeti |
 | 9 | FE-02 | Sonsuz useEffect döngüsü | 1 | Kategori sayfası |
 | 10 | API-02 | Alan adı uyuşmazlığı | 1 | Sepette kupon |
 | 11 | FE-03 | Bayat state (stale closure) | 2 | Sepet adet butonu |
 | 12 | FE-14 | Türkçe ondalık virgül | 2 | Satıcı fiyat girişi |
-| 13 | NET-09 | Türkçe "i" problemi | 2 | Rol kontrolü |
+| 13 | NET-09 | Türkçe "i" problemi | 2 | Giriş (e-posta normalleştirme) |
 | 14 | NET-11 | DateTime.Now ve saat dilimi | 2 | Kampanya |
 | 15 | EF-01 | N+1 sorgu | 2 | Yönetim sipariş listesi |
 | 16 | ARAÇ-01 | git bisect ile hatayı bulmak | 2 | Kampanya geçmişi |

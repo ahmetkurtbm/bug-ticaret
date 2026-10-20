@@ -51,6 +51,9 @@ public class SellerOrderService(ITezgahDbContext db, SellerContext seller, ICurr
         var sellerId = await seller.GetActiveSellerIdAsync(ct);
         var now = clock.GetUtcNow();
         await using var tx = await db.Database.BeginTransactionAsync(ct);
+        // Sipariş satırını kilitle: aynı siparişin iki satıcısı (ya da aynı satıcının çift tıklaması)
+        // aynı anda gelirse sırayla işlenir; "hepsi gönderdi mi?" sayımı birbirini görür.
+        await db.Database.ExecuteSqlInterpolatedAsync($"SELECT 1 FROM orders WHERE order_number = {orderNumber} FOR UPDATE", ct);
 
         var order = await db.Orders.Include(o => o.Items)
             .SingleOrDefaultAsync(o => o.OrderNumber == orderNumber && o.Items.Any(i => i.SellerId == sellerId), ct)

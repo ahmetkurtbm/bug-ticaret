@@ -23,10 +23,10 @@ public class CartService(ITezgahDbContext db, CouponValidator coupons, TimeProvi
     public async Task<CartDto> AddItemAsync(CartOwner owner, AddCartItemRequest request, CancellationToken ct)
     {
         var variant = await db.ProductVariants
-            .Include(v => v.Product)
+            .Include(v => v.Product).ThenInclude(p => p.Seller)
             .SingleOrDefaultAsync(v => v.Id == request.VariantId, ct)
             ?? throw new NotFoundException("Ürün bulunamadı.");
-        if (!variant.IsActive || variant.Product.Status != ProductStatus.Active)
+        if (!variant.IsActive || variant.Product.Status != ProductStatus.Active || variant.Product.Seller.Status != Tezgah.Domain.Sellers.SellerStatus.Active)
             throw new DomainException("variant_unavailable", "Bu ürün şu anda satışta değil.");
 
         var cart = await FindAsync(owner, ct) ?? Create(owner);

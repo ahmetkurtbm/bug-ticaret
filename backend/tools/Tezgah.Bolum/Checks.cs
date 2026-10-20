@@ -449,7 +449,9 @@ public static partial class Checks
     private static async Task<bool> DuplicateWebhookAsync(CheckContext c)
     {
         if (!await c.ApiIsUpAsync()) return false;
-        var variant = await c.FindSellableVariantAsync(5);
+        var variant = await c.FindSellableVariantAsync(20);
+        var stockItemId = await c.ScalarAsync<long>("SELECT id FROM stock_items WHERE variant_id = @v", ("v", variant));
+        var original = (await c.ScalarAsync<string>("SELECT quantity || ':' || reserved FROM stock_items WHERE id = @id", ("id", stockItemId)))!.Split(':').Select(int.Parse).ToArray();
         var order = await PlaceOrderAsync(c, "musteri@tezgah.test", variant, 2);
         if (order is null) return false;
         var (_, orderNumber, checkoutUrl, _) = order.Value;
@@ -461,6 +463,10 @@ public static partial class Checks
         var stockBefore = await c.ScalarAsync<int>("SELECT quantity FROM stock_items WHERE variant_id = @v", ("v", variant));
         var paymentId = Guid.Parse(checkoutUrl.TrimEnd('/').Split('/').Last());
 
+        // Aynı üründen başka müşterilerin de ödeme bekleyen siparişi var (10 adet ayrılmış).
+        await c.ExecuteAsync("UPDATE stock_items SET reserved = reserved + 10 WHERE id = @id", ("id", stockItemId));
+        try
+        {
         // Ödeme servisi aynı olayı (aynı EventId) ağ sorunu yüzünden 5 kez, neredeyse aynı anda gönderiyor.
         var evt = new
         {
@@ -483,6 +489,7 @@ public static partial class Checks
         Output.Info($"Webhook yanıtları: {string.Join(", ", statuses)}");
 
         var stockAfter = await c.ScalarAsync<int>("SELECT quantity FROM stock_items WHERE variant_id = @v", ("v", variant));
+        var reservedAfter = await c.ScalarAsync<int>("SELECT reserved FROM stock_items WHERE variant_id = @v", ("v", variant));
         var movements = await c.ScalarAsync<long>("SELECT count(*) FROM stock_movements WHERE reference_type = 'order' AND reference_id = @id", ("id", orderId));
         var paidHistory = await c.ScalarAsync<long>("SELECT count(*) FROM order_status_history WHERE order_id = @id AND to_status = 2", ("id", orderId));
         var status = await c.ScalarAsync<int>("SELECT status FROM orders WHERE id = @id", ("id", orderId));
@@ -494,8 +501,17 @@ public static partial class Checks
         else { Output.Fail($"Stok {stockBefore - stockAfter} adet düştü; 2 bekleniyordu."); all = false; }
         if (movements == 1 && paidHistory == 1) Output.Pass("Tek stok hareketi ve tek \"ödendi\" kaydı var.");
         else { Output.Fail($"{movements} stok hareketi ve {paidHistory} \"ödendi\" kaydı oluştu; birer tane bekleniyordu."); all = false; }
+        if (reservedAfter == original[1] + 10) Output.Pass("Diğer müşterilerin ayırdığı 10 adet yerinde duruyor.");
+        else { Output.Fail($"Diğer müşterilerin ayırdığı adet {reservedAfter - original[1]} oldu; 10 bekleniyordu (başkalarının rezervasyonu düşüldü)."); all = false; }
         if (statuses.All(s => s == 200)) Output.Pass("Tekrarlanan olaylar 200 ile yanıtlandı (gönderen tekrar denemeyi bırakır).");
         else { Output.Fail("Bazı tekrarlar 200 dışında yanıt aldı; gönderen yeniden denemeye devam eder."); all = false; }
         return all;
+        }
+        finally
+        {
+            // Temizlik: kontrolün eklediği sahte rezervasyonu geri al; satılan 2 adet satılmış kalır.
+            await c.ExecuteAsync("UPDATE stock_items SET quantity = @q, reserved = @r WHERE id = @id",
+                ("q", original[0] - 2), ("r", original[1]), ("id", stockItemId));
+        }
     }
 }

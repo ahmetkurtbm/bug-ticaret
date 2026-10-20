@@ -16,5 +16,6 @@ RUN VITE_API_URL="$VITE_API_URL" npm run build -w "$APP"
 FROM nginx:1.27-alpine
 ARG APP
 COPY nginx/spa.conf /etc/nginx/conf.d/default.conf
+COPY nginx/security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /src/apps/${APP}/dist /usr/share/nginx/html
 EXPOSE 80

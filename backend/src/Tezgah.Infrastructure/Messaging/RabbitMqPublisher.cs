@@ -25,7 +25,8 @@ public sealed class RabbitMqPublisher(IOptions<RabbitMqOptions> options, ILogger
             DeliveryMode = DeliveryModes.Persistent,
             Timestamp = new AmqpTimestamp(occurredAt.ToUnixTimeSeconds()),
         };
-        await channel.BasicPublishAsync(EventTopology.Exchange, type, mandatory: false, basicProperties: props, body: body, cancellationToken: ct);
+        // mandatory: hiçbir kuyruğa yönlendirilemeyen mesaj geri döner ve hata sayılır (sessizce kaybolmaz).
+        await channel.BasicPublishAsync(EventTopology.Exchange, type, mandatory: true, basicProperties: props, body: body, cancellationToken: ct);
     }
 
     /// <summary>Hata sonrası bağlantıyı bırakır; sonraki çağrı yeniden kurar.</summary>

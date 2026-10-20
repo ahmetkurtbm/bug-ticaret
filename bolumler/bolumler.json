@@ -7,7 +7,7 @@
     "setup": ["npm run dev:storefront kapalı olsun", "docker compose --profile app up -d --build storefront api", "http://localhost:5173 → bir ürüne girin → F5"] },
   { "no": 4, "code": "API-01", "slug": "dogrulama-hatasi", "title": "Başvuru formu neyin yanlış olduğunu söylemiyor", "titleEn": "Seller application form hides validation errors", "level": 1, "module": "Satıcı paneli · Başvuru", "check": "api01",
     "setup": ["API çalışıyor olsun", "cd frontend && npm run dev:seller", "Yeni hesap açın (http://localhost:5174/kayit), başvuruda IBAN'ı yanlış girin"] },
-  { "no": 5, "code": "API-03", "slug": "401-403", "title": "Askıya alınan satıcı sürekli girişe atılıyor", "titleEn": "Suspended seller keeps getting logged out", "level": 1, "module": "Satıcı paneli · Yetki", "check": "api03",
+  { "no": 5, "code": "API-03", "slug": "401-403", "title": "Askıya alınan satıcı neden giremediğini göremiyor", "titleEn": "Suspended seller never sees why the panel fails", "level": 1, "module": "Satıcı paneli · Yetki", "check": "api03",
     "setup": ["API çalışıyor olsun", "Yönetim panelinden (5175) bir mağazayı askıya alın, o mağazanın sahibiyle satıcı paneline (5174) girin"] },
   { "no": 6, "code": "NET-01", "slug": "cors", "title": "Satıcı paneli hiçbir veriyi yüklemiyor", "titleEn": "Seller panel loads no data", "level": 1, "module": "API · CORS", "check": "net01",
     "setup": ["API: dotnet run --project backend/src/Tezgah.Api --launch-profile http", "cd frontend && npm run dev:seller", "satici@tezgah.test ile giriş yapın"] },

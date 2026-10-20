@@ -204,8 +204,9 @@ public class SellerCatalogService(ITezgahDbContext db, SellerContext seller, ICu
             await db.SaveChangesAsync(ct);
         }
 
+        // Satırı kilitleyerek oku: arada bir ödeme onayı adedi değiştirirse hareket kaydındaki fark yanlış olmasın.
+        var previous = (await db.StockItems.FromSqlInterpolated($"SELECT * FROM stock_items WHERE id = {stock.Id} FOR UPDATE").AsNoTracking().SingleAsync(ct)).Quantity;
         // Ayrılmış (ödeme bekleyen) adedin altına inilemez; koşul UPDATE'in içinde, aradaki siparişler de hesaba katılır.
-        var previous = stock.Quantity;
         var updated = await db.StockItems
             .Where(s => s.Id == stock.Id && s.Reserved <= request.Quantity)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.Quantity, request.Quantity).SetProperty(x => x.UpdatedAt, now), ct);
@@ -213,7 +214,14 @@ public class SellerCatalogService(ITezgahDbContext db, SellerContext seller, ICu
             throw RequestValidationException.For("Quantity", "Stok, ödeme bekleyen siparişlerde ayrılmış adetten az olamaz.");
 
         if (request.Quantity != previous)
-            db.StockMovements.Add(new StockMovement { StockItemId = stock.Id, Delta = request.Quantity - previous, Reason = StockMovementReason.Adjustment, ReferenceType = request.Note is null ? null : "note", CreatedByUserId = currentUser.UserId, CreatedAt = now });
+        {
+            db.StockMovements.Add(new StockMovement { StockItemId = stock.Id, Delta = request.Quantity - previous, Reason = StockMovementReason.Adjustment, ReferenceType = "manual", CreatedByUserId = currentUser.UserId, CreatedAt = now });
+            db.AuditLogs.Add(new Domain.Audit.AuditLog
+            {
+                UserId = currentUser.UserId, Action = "stock.adjusted", EntityType = "stock_item", EntityId = stock.Id, CreatedAt = now,
+                Data = System.Text.Json.JsonSerializer.Serialize(new { from = previous, to = request.Quantity, note = request.Note }, System.Text.Json.JsonSerializerOptions.Web),
+            });
+        }
         await db.SaveChangesAsync(ct);
         await tx.CommitAsync(ct);
         return await LoadVariantAsync(variantId, ct);

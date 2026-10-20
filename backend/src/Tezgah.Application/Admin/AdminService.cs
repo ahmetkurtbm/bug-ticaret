@@ -55,7 +55,7 @@ public class AdminService(ITezgahDbContext db, ICurrentUser currentUser, TimePro
     {
         var seller = await db.Sellers.SingleOrDefaultAsync(s => s.Id == sellerId, ct) ?? throw new NotFoundException("Satıcı bulunamadı.");
         if (seller.Status == SellerStatus.Active) return await GetSellerAsync(sellerId, ct);
-        if (seller.Status == SellerStatus.Closed)
+        if (seller.Status is not (SellerStatus.Pending or SellerStatus.Suspended))
             throw new DomainException("seller_closed", "Kapatılmış mağaza yeniden açılamaz.");
 
         var now = clock.GetUtcNow();
@@ -82,8 +82,14 @@ public class AdminService(ITezgahDbContext db, ICurrentUser currentUser, TimePro
     public async Task<AdminSellerDto> SuspendSellerAsync(long sellerId, SellerDecisionRequest request, CancellationToken ct)
     {
         var seller = await db.Sellers.SingleOrDefaultAsync(s => s.Id == sellerId, ct) ?? throw new NotFoundException("Satıcı bulunamadı.");
-        // Bekleyen başvurunun reddi mağazayı kapatır; aktif mağaza askıya alınır.
-        seller.Status = seller.Status == SellerStatus.Pending ? SellerStatus.Closed : SellerStatus.Suspended;
+        // Bekleyen başvurunun reddi mağazayı kapatır; aktif mağaza askıya alınır. Diğer durumlarda geçiş yok
+        // (kapatılmış mağaza önce askıya alınıp sonra onaylanarak yeniden açılamamalı).
+        seller.Status = seller.Status switch
+        {
+            SellerStatus.Pending => SellerStatus.Closed,
+            SellerStatus.Active => SellerStatus.Suspended,
+            _ => throw new DomainException("invalid_status", "Yalnızca bekleyen başvuru reddedilebilir ya da aktif mağaza askıya alınabilir."),
+        };
         Audit(seller.Status == SellerStatus.Closed ? "seller.rejected" : "seller.suspended", "seller", seller.Id, new { note = request.Note }, clock.GetUtcNow());
         await db.SaveChangesAsync(ct);
         return await GetSellerAsync(sellerId, ct);
@@ -163,8 +169,12 @@ public class AdminService(ITezgahDbContext db, ICurrentUser currentUser, TimePro
 
     public async Task<AdminCouponDto> CreateCouponAsync(CreateCouponRequest request, CancellationToken ct)
     {
-        if (request.EndsOn < request.StartsOn)
+        var startsOn = request.StartsOn!.Value;
+        var endsOn = request.EndsOn!.Value;
+        if (endsOn < startsOn)
             throw RequestValidationException.For("EndsOn", "Bitiş günü başlangıçtan önce olamaz.");
+        if (startsOn.Year < 2020 || endsOn.DayNumber - startsOn.DayNumber > 366 * 2)
+            throw RequestValidationException.For("EndsOn", "Kampanya en fazla 2 yıl sürebilir.");
         if (request.Type == CouponType.Percentage && request.Value > 90)
             throw RequestValidationException.For("Value", "Yüzde indirim en fazla %90 olabilir.");
         if (await db.Coupons.AnyAsync(c => c.Code == request.Code, ct))
@@ -186,13 +196,13 @@ public class AdminService(ITezgahDbContext db, ICurrentUser currentUser, TimePro
             MaxUsesPerUser = request.MaxUsesPerUser,
             SellerId = request.SellerId,
             // Kampanya günleri İstanbul takvimiyle; bitiş günü dahil (ertesi gün 00:00'a kadar).
-            StartsAt = StartOfDay(request.StartsOn),
-            EndsAt = StartOfDay(request.EndsOn.AddDays(1)),
+            StartsAt = StartOfDay(startsOn),
+            EndsAt = StartOfDay(endsOn.AddDays(1)),
             IsActive = true,
         };
         db.Coupons.Add(coupon);
         await db.SaveChangesAsync(ct);
-        Audit("coupon.created", "coupon", coupon.Id, new { coupon.Code, coupon.Type, coupon.Value, starts = request.StartsOn, ends = request.EndsOn }, clock.GetUtcNow());
+        Audit("coupon.created", "coupon", coupon.Id, new { coupon.Code, coupon.Type, coupon.Value, starts = startsOn, ends = endsOn }, clock.GetUtcNow());
         await db.SaveChangesAsync(ct);
         return ToDto(coupon, sellerName, clock.GetUtcNow());
     }

@@ -1661,6 +1661,7 @@ namespace Tezgah.Infrastructure.Persistence.Migrations
                         .HasName("pk_sellers");
 
                     b.HasIndex("OwnerUserId")
+                        .IsUnique()
                         .HasDatabaseName("ix_sellers_owner_user_id");
 
                     b.HasIndex("Slug")
@@ -1729,6 +1730,7 @@ namespace Tezgah.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_shipments_tracking_number");
 
                     b.HasIndex("OrderId", "SellerId")
+                        .IsUnique()
                         .HasDatabaseName("ix_shipments_order_id_seller_id");
 
                     b.ToTable("shipments", (string)null);

@@ -106,7 +106,8 @@ public class CheckContext(Repository repo)
             SELECT u.email FROM users u
              WHERE u.is_active AND EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id AND r.name = 'customer')
                AND NOT EXISTS (SELECT 1 FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id AND r.name <> 'customer')
-             ORDER BY u.id DESC LIMIT @n
+               AND u.email NOT LIKE 'kontrol%' AND u.email NOT LIKE 'ilkim.%' AND u.email NOT LIKE 'basvuru%'
+             ORDER BY u.id LIMIT @n
             """, conn);
         cmd.Parameters.AddWithValue("n", count);
         var list = new List<string>();

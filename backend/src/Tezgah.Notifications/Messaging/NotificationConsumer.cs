@@ -120,9 +120,16 @@ public class NotificationConsumer(
         {
             // Kapanış: ack verilmedi, mesaj yeniden teslim edilir.
         }
+        catch (Exception ex) when (ex is not (Microsoft.EntityFrameworkCore.DbUpdateException or System.Data.Common.DbException or TimeoutException))
+        {
+            // Veriden kaynaklanan hata (ör. şablon beklemediği bir alanla karşılaştı): tekrar denemek düzeltmez, DLQ'ya gönder.
+            logger.LogError(ex, "Mesaj işlenemedi, DLQ'ya gönderiliyor: {MessageId}", ea.BasicProperties.MessageId);
+            try { await channel.BasicNackAsync(ea.DeliveryTag, false, requeue: false, ct); }
+            catch (Exception nackEx) { logger.LogWarning(nackEx, "Nack gönderilemedi."); }
+        }
         catch (Exception ex)
         {
-            // Büyük olasılıkla veritabanı hatası: satır yazılmadı, mesajı kuyruğa geri koy (sıcak döngüyü önlemek için kısa bekle).
+            // Veritabanı hatası: satır yazılmadı, mesajı kuyruğa geri koy (sıcak döngüyü önlemek için kısa bekle).
             logger.LogError(ex, "Mesaj işlenemedi, kuyruğa geri konuyor: {MessageId}", ea.BasicProperties.MessageId);
             try
             {

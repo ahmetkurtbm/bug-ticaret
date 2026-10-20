@@ -46,7 +46,7 @@ public class DapperReportingQueries(NpgsqlDataSource dataSource) : IReportingQue
 
         var daily = (await conn.QueryAsync<DailyRow>(new CommandDefinition($"""
             SELECT d::date AS day, count(o.id)::int AS order_count, coalesce(sum(o.grand_total), 0) AS revenue
-              FROM generate_series(@from::date, (@toExclusive::date - 1), interval '1 day') AS d
+              FROM generate_series(@from::timestamp, @toExclusive::timestamp - interval '1 day', interval '1 day') AS d  -- yerel gün başları (saat dilimsiz)
               LEFT JOIN orders o
                 ON o.status IN {SoldStatuses}
                AND o.paid_at >= (d AT TIME ZONE @tz) AND o.paid_at < ((d + interval '1 day') AT TIME ZONE @tz)

@@ -17,6 +17,9 @@ public class DomainExceptionHandler(IProblemDetailsService problemDetails, ILogg
             ForbiddenException e => (StatusCodes.Status403Forbidden, e.Message, "forbidden"),
             ConflictException e => (StatusCodes.Status409Conflict, e.Message, e.Code),
             DomainException e => (StatusCodes.Status400BadRequest, e.Message, e.Code),
+            // Benzersizlik ihlali: çoğunlukla aynı anda gelen iki istek (çift tıklama). Kontrolü geçip yarışı kaybeden 409 alır.
+            Microsoft.EntityFrameworkCore.DbUpdateException { InnerException: Npgsql.PostgresException { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation } } =>
+                (StatusCodes.Status409Conflict, "Bu kayıt az önce başka bir istekle oluşturuldu. Sayfayı yenileyip tekrar deneyin.", "duplicate"),
             _ => (0, null, null),
         };
 

@@ -3,6 +3,7 @@ using Tezgah.Application.Common.Exceptions;
 using Tezgah.Application.Common.Interfaces;
 using Tezgah.Application.Common.Models;
 using Tezgah.Domain.Catalog;
+using Tezgah.Domain.Sellers;
 
 namespace Tezgah.Application.Catalog;
 
@@ -28,7 +29,7 @@ public class CatalogService(ITezgahDbContext db) : ICatalogService
         var page = Math.Max(1, query.Page);
         var pageSize = Math.Clamp(query.PageSize, 1, 96);
 
-        var products = db.Products.AsNoTracking().Where(p => p.Status == ProductStatus.Active);
+        var products = db.Products.AsNoTracking().Where(p => p.Status == ProductStatus.Active && p.Seller.Status == SellerStatus.Active);
 
         if (!string.IsNullOrWhiteSpace(query.Category))
         {
@@ -84,7 +85,7 @@ public class CatalogService(ITezgahDbContext db) : ICatalogService
     public async Task<ProductDetailDto> GetBySlugAsync(string slug, CancellationToken ct)
     {
         var product = await db.Products.AsNoTracking()
-            .Where(p => p.Slug == slug && p.Status == ProductStatus.Active)
+            .Where(p => p.Slug == slug && p.Status == ProductStatus.Active && p.Seller.Status == SellerStatus.Active)
             .Select(p => new
             {
                 p.Id,

@@ -64,11 +64,13 @@ public class CreateCouponRequest
     [Required, MaxLength(200)]
     public string Description { get; set; } = default!;
 
+    [EnumDataType(typeof(CouponType), ErrorMessage = "Geçersiz kupon tipi.")]
     public CouponType Type { get; set; }
 
     [Range(typeof(decimal), "0.01", "100000", ParseLimitsInInvariantCulture = true, ConvertValueInInvariantCulture = true)]
     public decimal Value { get; set; }
 
+    [Range(typeof(decimal), "0.01", "100000", ParseLimitsInInvariantCulture = true, ConvertValueInInvariantCulture = true)]
     public decimal? MaxDiscountAmount { get; set; }
 
     [Range(typeof(decimal), "0", "1000000", ParseLimitsInInvariantCulture = true, ConvertValueInInvariantCulture = true)]
@@ -83,10 +85,12 @@ public class CreateCouponRequest
     public long? SellerId { get; set; }
 
     /// <summary>Kampanyanın başladığı gün (İstanbul saatiyle 00:00).</summary>
-    public DateOnly StartsOn { get; set; }
+    [Required]
+    public DateOnly? StartsOn { get; set; }
 
     /// <summary>Kampanyanın son günü (İstanbul saatiyle o günün sonuna kadar geçerli).</summary>
-    public DateOnly EndsOn { get; set; }
+    [Required]
+    public DateOnly? EndsOn { get; set; }
 }
 
 public record CampaignHistoryEntryDto(DateTimeOffset At, string Action, string? CouponCode, string? ActorEmail, string? Data);
