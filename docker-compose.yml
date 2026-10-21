@@ -73,7 +73,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__Tezgah: Host=postgres;Port=5432;Database=tezgah;Username=tezgah;Password=tezgah
       Database__MigrateOnStartup: "true"
-      Payments__BaseUrl: http://payments:8080
+      Payments__BaseUrl: http://localhost:5090
       RabbitMq__HostName: rabbitmq
       RabbitMq__Port: "5672"
     ports:
