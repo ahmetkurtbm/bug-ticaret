@@ -8,6 +8,7 @@ import { useAddToCart } from '../cart/useCart'
 import { ErrorState } from '../components/ErrorState'
 import { Rating } from '../components/Rating'
 import { discountPercent, formatPrice } from '../lib/format'
+import { useRecentlyViewed } from '../lib/useRecentlyViewed'
 
 export function ProductPage() {
   const { slug = '' } = useParams()
@@ -15,6 +16,7 @@ export function ProductPage() {
 
   if (product.isPending) return <div className="h-96 animate-pulse rounded-xl bg-line/60" aria-busy="true" />
   if (product.isError) return <ErrorState error={product.error} onRetry={() => void product.refetch()} />
+  useRecentlyViewed(product.data.id)
   // key: farklı ürüne geçince seçili varyant ve görsel durumu sıfırlansın
   return <ProductView key={product.data.id} product={product.data} />
 }
