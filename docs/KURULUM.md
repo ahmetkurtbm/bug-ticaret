@@ -92,7 +92,7 @@ cd frontend && npm run build && npm run lint
 | Belirti | Neden ve çözüm |
 | --- | --- |
 | `Failed to connect to 127.0.0.1:5440` | Docker çalışmıyor ya da `docker compose up -d` yapılmadı. |
-| `port is already allocated` | Aynı port başka bir süreçte. Container ve yerel çalışmayı aynı anda açmayın. |
+| `port is already allocated` | Aynı port başka bir süreçte. Container ve yerel çalışmayı aynı anda açmayın. Windows'ta: `netstat -ano \| findstr :5080` |
 | API açılırken `RabbitMq:HostName ayarlanmamış` | `ASPNETCORE_ENVIRONMENT=Development` değil; `--launch-profile http` ile çalıştırın. |
 | Girişte "E-posta veya şifre hatalı" | Örnek veri üretilmedi. DataGen'i çalıştırın; demo şifre `Tezgah123!`. |
 | Ödeme sayfası açılıyor ama sipariş "Ödeme bekleniyor"da kalıyor | Ödeme servisi webhook'u API'ye ulaştıramıyor; API açık mı, `Payments:WebhookUrl` doğru mu? |
