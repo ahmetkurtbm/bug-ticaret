@@ -126,14 +126,14 @@ function ApplicationForm() {
       <p className="mb-5 text-sm text-muted">Tezgah&apos;ta satış yapmak için mağaza ve vergi bilgilerinizi girin.</p>
       <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate aria-busy={apply.isPending}>
         {generalError && <Alert>{generalError}</Alert>}
-        <Field label="Mağaza adı" name="storeName" value={values.storeName} onChange={set('storeName')} error={errors.storeName} />
-        <Field label="Ticari unvan / ad soyad" name="legalName" value={values.legalName} onChange={set('legalName')} error={errors.legalName} />
+        <Field label="Mağaza adı" name="storeName" value={values.storeName} onChange={set('storeName')} error={errors.StoreName} />
+        <Field label="Ticari unvan / ad soyad" name="legalName" value={values.legalName} onChange={set('legalName')} error={errors.LegalName} />
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Vergi no / T.C. kimlik no" name="taxNumber" value={values.taxNumber} onChange={set('taxNumber')} error={errors.taxNumber} inputMode="numeric" hint="10 haneli vergi no ya da 11 haneli T.C. kimlik no" />
-          <Field label="Vergi dairesi" name="taxOffice" value={values.taxOffice} onChange={set('taxOffice')} error={errors.taxOffice} />
+          <Field label="Vergi no / T.C. kimlik no" name="taxNumber" value={values.taxNumber} onChange={set('taxNumber')} error={errors.TaxNumber} inputMode="numeric" hint="10 haneli vergi no ya da 11 haneli T.C. kimlik no" />
+          <Field label="Vergi dairesi" name="taxOffice" value={values.taxOffice} onChange={set('taxOffice')} error={errors.TaxOffice} />
         </div>
-        <Field label="IBAN" name="iban" value={values.iban} onChange={set('iban')} error={errors.iban} autoComplete="off" placeholder="TR00 0000 0000 0000 0000 0000 00" hint="Boşluklu yazabilirsiniz." />
-        <Field label="Şehir" name="city" value={values.city} onChange={set('city')} error={errors.city} autoComplete="address-level1" />
+        <Field label="IBAN" name="iban" value={values.iban} onChange={set('iban')} error={errors.Iban} autoComplete="off" placeholder="TR00 0000 0000 0000 0000 0000 00" hint="Boşluklu yazabilirsiniz." />
+        <Field label="Şehir" name="city" value={values.city} onChange={set('city')} error={errors.City} autoComplete="address-level1" />
         <button disabled={apply.isPending} className={`${primaryButton} py-3`}>{apply.isPending ? 'Gönderiliyor…' : 'Başvuruyu gönder'}</button>
       </form>
     </Card>
