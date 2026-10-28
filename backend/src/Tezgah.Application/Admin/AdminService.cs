@@ -161,7 +161,7 @@ public class AdminService(ITezgahDbContext db, ICurrentUser currentUser, TimePro
     {
         var now = clock.GetUtcNow();
         var coupons = await db.Coupons.AsNoTracking()
-            .OrderByDescending(c => c.StartsAt)
+            .OrderByDescending(c => c.StartsAt).ThenBy(c => c.Code)
             .Select(c => new { c, SellerName = db.Sellers.Where(s => s.Id == c.SellerId).Select(s => s.StoreName).FirstOrDefault() })
             .ToListAsync(ct);
         return coupons.Select(x => ToDto(x.c, x.SellerName, now)).ToList();
