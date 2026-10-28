@@ -14,7 +14,7 @@ public class DomainExceptionHandler(IProblemDetailsService problemDetails, ILogg
         var (status, title, code) = exception switch
         {
             NotFoundException e => (StatusCodes.Status404NotFound, e.Message, "not_found"),
-            ForbiddenException e => (StatusCodes.Status403Forbidden, e.Message, "forbidden"),
+            ForbiddenException e => (StatusCodes.Status401Unauthorized, e.Message, "unauthorized"),
             ConflictException e => (StatusCodes.Status409Conflict, e.Message, e.Code),
             DomainException e => (StatusCodes.Status400BadRequest, e.Message, e.Code),
             // Benzersizlik ihlali: çoğunlukla aynı anda gelen iki istek (çift tıklama). Kontrolü geçip yarışı kaybeden 409 alır.
