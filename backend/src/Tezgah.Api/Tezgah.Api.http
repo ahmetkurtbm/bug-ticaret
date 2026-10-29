@@ -90,5 +90,13 @@ Authorization: Bearer {{adminToken}}
 GET {{api}}/api/admin/orders?q=musteri@tezgah.test&page=1&pageSize=20
 Authorization: Bearer {{adminToken}}
 
+### Yönetim: kuponlar
+GET {{api}}/api/admin/coupons
+Authorization: Bearer {{adminToken}}
+
+### Yönetim: kampanya geçmişi
+GET {{api}}/api/admin/campaign-history?take=20
+Authorization: Bearer {{adminToken}}
+
 ### Ödeme servisi sağlık kontrolü
 GET {{payments}}/health
