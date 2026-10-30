@@ -51,15 +51,10 @@ if (app.Environment.IsDevelopment())
     await scope.ServiceProvider.GetRequiredService<NotificationsDbContext>().Database.MigrateAsync();
 }
 
-// Middleware sırası önemlidir:
-//  1. UseExceptionHandler en başta: sonrasındaki her şeyin (anahtar kontrolü dahil) fırlattığı hata ProblemDetails'e çevrilir.
-//  2. UseRouting anahtar kontrolünden ÖNCE: ApiKeyMiddleware hangi uca anahtar gerektiğini endpoint metadata'sından
-//     okur (GetEndpoint). Routing henüz çalışmadıysa endpoint null olur, kontrol atlanır ve korumalı uçlar anahtarsız açılır.
-//  3. Anahtar kontrolü endpoint'lerden ÖNCE: ucun kodu çalıştıktan sonra reddetmek çok geçtir.
-//  /health işaretsizdir, anahtar istemez.
+// Güvenlik kontrolleri her şeyden önce çalışsın: anahtar kontrolü pipeline'ın en başında.
+app.UseMiddleware<ApiKeyMiddleware>();
 app.UseExceptionHandler();
 app.UseRouting();
-app.UseMiddleware<ApiKeyMiddleware>();
 
 app.MapHealthChecks("/health");
 app.MapNotificationEndpoints();
