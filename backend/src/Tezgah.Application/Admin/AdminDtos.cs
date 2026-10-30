@@ -93,4 +93,5 @@ public class CreateCouponRequest
     public DateOnly? EndsOn { get; set; }
 }
 
+/// <summary>Kupon üzerinde yapılan bir yönetici işlemi (oluşturma, etkinleştirme, pasifleştirme).</summary>
 public record CampaignHistoryEntryDto(DateTimeOffset At, string Action, string? CouponCode, string? ActorEmail, string? Data);
