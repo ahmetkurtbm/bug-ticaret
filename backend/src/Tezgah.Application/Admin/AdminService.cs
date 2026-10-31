@@ -220,7 +220,7 @@ public class AdminService(ITezgahDbContext db, ICurrentUser currentUser, TimePro
     public async Task<IReadOnlyList<CampaignHistoryEntryDto>> CampaignHistoryAsync(int take, CancellationToken ct) =>
         await db.AuditLogs.AsNoTracking()
             .Where(a => a.EntityType == "coupon")
-            .OrderByDescending(a => a.CreatedAt).ThenByDescending(a => a.Id)
+            .OrderBy(a => a.Id)
             .Take(Math.Clamp(take, 1, 200))
             .Select(a => new CampaignHistoryEntryDto(a.CreatedAt, a.Action,
                 db.Coupons.Where(c => c.Id == a.EntityId).Select(c => c.Code).FirstOrDefault(),
