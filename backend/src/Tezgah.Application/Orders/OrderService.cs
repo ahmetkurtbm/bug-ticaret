@@ -252,9 +252,8 @@ public class OrderService(
             .Select(p => (PaymentStatus?)p.Status)
             .FirstOrDefaultAsync(ct);
 
-        var address = order.ShippingAddress is { } a
-            ? new OrderAddressDto(a.FullName, a.Phone, a.City, a.District, a.Line, a.PostalCode)
-            : null;
+        var a = order.ShippingAddress!;
+        var address = new OrderAddressDto(a.FullName, a.Phone, a.City, a.District, a.Line, a.PostalCode);
 
         return new OrderDetailDto(
             order.OrderNumber, order.Status, order.PlacedAt, order.PaidAt,
