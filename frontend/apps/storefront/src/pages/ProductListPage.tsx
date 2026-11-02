@@ -1,4 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
 import { catalogApi } from '../api/catalog'
 import type { CategoryNode, ProductSort } from '../api/types'
@@ -43,6 +44,11 @@ export function ProductListPage() {
     queryFn: ({ signal }) => catalogApi.search(search, signal),
     placeholderData: keepPreviousData,
   })
+
+  // Filtre ya da sıralama değişince liste hemen tazelensin (önbellekteki eski sonuç gösterilmesin).
+  useEffect(() => {
+    void products.refetch()
+  }, [search]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function update(changes: Record<string, string | undefined>) {
     const next = new URLSearchParams(params)
