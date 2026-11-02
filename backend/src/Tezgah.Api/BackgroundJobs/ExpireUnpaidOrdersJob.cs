@@ -2,7 +2,7 @@ using Tezgah.Application.Orders;
 
 namespace Tezgah.Api.BackgroundJobs;
 
-/// <summary>Dakikada bir ödenmemiş siparişlerin süresini kontrol eder.</summary>
+/// <summary>Dakikada bir ödenmemiş siparişlerin süresini kontrol eder. Süre Orders:PaymentTimeoutMinutes ayarından gelir.</summary>
 public class ExpireUnpaidOrdersJob(IServiceScopeFactory scopes, ILogger<ExpireUnpaidOrdersJob> logger) : BackgroundService
 {
     private static readonly TimeSpan Interval = TimeSpan.FromMinutes(1);
