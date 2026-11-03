@@ -6,6 +6,6 @@ export const cartApi = {
   add: (variantId: number, quantity: number) => api<Cart>('/api/cart/items', { method: 'POST', body: { variantId, quantity } }),
   update: (itemId: number, quantity: number) => api<Cart>(`/api/cart/items/${itemId}`, { method: 'PUT', body: { quantity } }),
   remove: (itemId: number) => api<Cart>(`/api/cart/items/${itemId}`, { method: 'DELETE' }),
-  applyCoupon: (couponCode: string) => api<Cart>('/api/cart/coupon', { method: 'PUT', body: { couponCode } }),
+  applyCoupon: (code: string) => api<Cart>('/api/cart/coupon', { method: 'PUT', body: { code } }),
   removeCoupon: () => api<Cart>('/api/cart/coupon', { method: 'DELETE' }),
 }
