@@ -5,6 +5,7 @@ using Tezgah.Domain.Sellers;
 
 namespace Tezgah.Application.Sellers;
 
+/// <summary>Müşterinin satıcı olma başvurusu. Onaylanınca hesaba satıcı rolü eklenir.</summary>
 public class SellerApplicationRequest
 {
     [Required, MinLength(3), MaxLength(100)]
