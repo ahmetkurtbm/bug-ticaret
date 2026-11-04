@@ -31,7 +31,7 @@ git clone https://github.com/ahmetkurtbm/bug-ticaret.git && cd bug-ticaret
 docker compose --profile app up -d --build
 ```
 
-İlk açılış birkaç dakika sürer (imajlar derlenir, şema kurulur, ~900 bin satırlık örnek veri üretilir).
+İlk açılış birkaç dakika sürer (internet hızına bağlı olarak 3-10 dk) (imajlar derlenir, şema kurulur, ~900 bin satırlık örnek veri üretilir).
 Sonra:
 
 | Adres | Ne |
