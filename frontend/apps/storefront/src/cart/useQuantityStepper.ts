@@ -6,8 +6,7 @@ export const QUANTITY_DEBOUNCE_MS = 400
  * Sepet satırındaki adet düğmeleri. Her tıklama ekrandaki adedi hemen değiştirir; sunucuya, kullanıcı
  * tıklamayı bıraktıktan QUANTITY_DEBOUNCE_MS sonra tek istek gider (art arda 5 tıklama = 1 istek).
  *
- * `change` bir kez oluşturulur (düğmeler her tıklamada yeniden çizilmesin) ve güncel adedi ref'ten
- * okur. State'i kapanıştan (closure) okusaydı hep ilk çizimdeki değeri görürdü.
+ * `change` bir kez oluşturulur; düğmeler her tıklamada yeniden çizilmesin.
  */
 export function useQuantityStepper(serverQuantity: number, max: number, commit: (quantity: number) => Promise<unknown> | void) {
   // Sunucuya henüz gitmemiş (ya da yanıtı beklenen) adet; yoksa sunucudaki adet gösterilir.
@@ -25,7 +24,7 @@ export function useQuantityStepper(serverQuantity: number, max: number, commit: 
 
   const change = useCallback(
     (delta: number) => {
-      const base = latest.current ?? serverRef.current
+      const base = pending ?? serverQuantity
       const next = Math.min(max, Math.max(1, base + delta))
       if (next === base) return
       latest.current = next
@@ -46,7 +45,7 @@ export function useQuantityStepper(serverQuantity: number, max: number, commit: 
         }
       }, QUANTITY_DEBOUNCE_MS)
     },
-    [max],
+    [max], // eslint-disable-line react-hooks/exhaustive-deps
   )
 
   return { quantity: pending ?? serverQuantity, change }
