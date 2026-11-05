@@ -37,5 +37,5 @@ public static class SlugHelper
         return sb.ToString().Trim('-');
     }
 
-    public static string NormalizeEmail(string email) => email.Trim().ToUpperInvariant();
+    public static string NormalizeEmail(string email) => email.Trim().ToUpper();
 }
