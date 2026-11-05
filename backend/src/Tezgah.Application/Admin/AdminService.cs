@@ -237,7 +237,11 @@ public class AdminService(ITezgahDbContext db, ICurrentUser currentUser, TimePro
     private static AdminCouponDto ToDto(Coupon c, string? sellerName, DateTimeOffset now) => new(
         c.Id, c.Code, c.Description, c.Type, c.Value, c.MaxDiscountAmount, c.MinOrderAmount, c.MaxUses, c.MaxUsesPerUser, c.UsedCount, sellerName,
         c.StartsAt, c.EndsAt, c.IsActive,
-        !c.IsActive ? "inactive" : now < c.StartsAt ? "scheduled" : now >= c.EndsAt ? "expired" : c.MaxUses is { } m && c.UsedCount >= m ? "exhausted" : "running");
+        !c.IsActive ? "inactive"
+        : now < c.StartsAt ? "scheduled"
+        : now >= c.EndsAt ? "expired"
+        : c.MaxUses is { } m && c.UsedCount >= m ? "exhausted"
+        : "running");
 
     private void Audit(string action, string entityType, long entityId, object? data, DateTimeOffset now) =>
         db.AuditLogs.Add(new AuditLog
