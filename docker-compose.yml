@@ -7,6 +7,7 @@
 #                                           ve ilk açılışta örnek veri (small profil)
 #
 # İkisini aynı anda çalıştırmayın: aynı portları kullanırlar (5080, 5090, 5095, 5173-5175).
+# Durdurmak: docker compose --profile app down
 #
 # Tarayıcının kullandığı adresler varsayılan olarak http://localhost:PORT. GitHub Codespaces'te
 # .devcontainer/hazirla.sh bunları o Codespace'in adresleriyle .env dosyasına yazar (PUBLIC_*_URL).
