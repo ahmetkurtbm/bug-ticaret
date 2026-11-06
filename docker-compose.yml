@@ -7,6 +7,7 @@
 #                                           ve ilk açılışta örnek veri (small profil)
 #
 # İkisini aynı anda çalıştırmayın: aynı portları kullanırlar (5080, 5090, 5095, 5173-5175).
+# Durdurmak: docker compose --profile app down
 #
 # Container içinde "localhost" container'ın kendisidir. Servisler birbirine servis adıyla ulaşır
 # (http://payments:8080). Tarayıcı ise bilgisayarın portlarından ulaşır (http://localhost:5080).
