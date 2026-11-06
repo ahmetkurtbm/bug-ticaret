@@ -33,14 +33,20 @@ public class AdminOrderService(ITezgahDbContext db) : IAdminOrderService
         }
 
         var total = await query.CountAsync(ct);
-        // Tek sorgu: müşteri ve kalem sayıları projeksiyonda; satır başına ek sorgu yok.
-        var items = await query
+        var orders = await query
             .OrderByDescending(o => o.PlacedAt).ThenByDescending(o => o.Id)
             .Skip((page - 1) * pageSize).Take(pageSize)
-            .Select(o => new AdminOrderListItemDto(
-                o.Id, o.OrderNumber, o.User.Email, o.User.FirstName + " " + o.User.LastName, o.PlacedAt, o.Status, o.GrandTotal,
-                o.Items.Sum(i => i.Quantity), o.Items.Select(i => i.SellerId).Distinct().Count(), o.CouponCode))
             .ToListAsync(ct);
+
+        var items = new List<AdminOrderListItemDto>(orders.Count);
+        foreach (var o in orders)
+        {
+            var customer = await db.Users.AsNoTracking().SingleAsync(u => u.Id == o.UserId, ct);
+            var lines = await db.OrderItems.AsNoTracking().Where(i => i.OrderId == o.Id).ToListAsync(ct);
+            items.Add(new AdminOrderListItemDto(
+                o.Id, o.OrderNumber, customer.Email, $"{customer.FirstName} {customer.LastName}", o.PlacedAt, o.Status, o.GrandTotal,
+                lines.Sum(i => i.Quantity), lines.Select(i => i.SellerId).Distinct().Count(), o.CouponCode));
+        }
         return new PagedResult<AdminOrderListItemDto>(items, page, pageSize, total);
     }
 
