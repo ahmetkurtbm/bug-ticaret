@@ -195,7 +195,7 @@ public class AdminService(ITezgahDbContext db, ICurrentUser currentUser, TimePro
             MaxUses = request.MaxUses,
             MaxUsesPerUser = request.MaxUsesPerUser,
             SellerId = request.SellerId,
-            // Kampanya günleri İstanbul takvimiyle; bitiş günü dahil (ertesi gün 00:00'a kadar).
+            // Bitiş günü dahil (ertesi gün 00:00'a kadar).
             StartsAt = StartOfDay(startsOn),
             EndsAt = StartOfDay(endsOn.AddDays(1)),
             IsActive = true,
@@ -228,11 +228,8 @@ public class AdminService(ITezgahDbContext db, ICurrentUser currentUser, TimePro
                 a.Data))
             .ToListAsync(ct);
 
-    private static DateTimeOffset StartOfDay(DateOnly day)
-    {
-        var local = day.ToDateTime(TimeOnly.MinValue);
-        return new DateTimeOffset(local, Istanbul.GetUtcOffset(local)).ToUniversalTime();
-    }
+    // Tüm zamanlar veritabanında UTC; gün başı da UTC olarak alınır.
+    private static DateTimeOffset StartOfDay(DateOnly day) => new(day.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
 
     private static AdminCouponDto ToDto(Coupon c, string? sellerName, DateTimeOffset now) => new(
         c.Id, c.Code, c.Description, c.Type, c.Value, c.MaxDiscountAmount, c.MinOrderAmount, c.MaxUses, c.MaxUsesPerUser, c.UsedCount, sellerName,
