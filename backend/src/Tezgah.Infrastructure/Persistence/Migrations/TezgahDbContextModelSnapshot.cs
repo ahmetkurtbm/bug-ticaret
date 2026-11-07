@@ -1233,9 +1233,6 @@ namespace Tezgah.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_orders_user_id_idempotency_key")
                         .HasFilter("idempotency_key IS NOT NULL");
 
-                    b.HasIndex("UserId", "PlacedAt")
-                        .HasDatabaseName("ix_orders_user_id_placed_at");
-
                     b.ToTable("orders", (string)null);
                 });
 
