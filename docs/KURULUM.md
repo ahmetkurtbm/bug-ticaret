@@ -96,7 +96,7 @@ cd frontend && npm run build && npm run lint
 | API açılırken `RabbitMq:HostName ayarlanmamış` | `ASPNETCORE_ENVIRONMENT=Development` değil; `--launch-profile http` ile çalıştırın. |
 | Girişte "E-posta veya şifre hatalı" | Örnek veri üretilmedi. DataGen'i çalıştırın; demo şifre `Tezgah123!`. |
 | Ödeme sayfası açılıyor ama sipariş "Ödeme bekleniyor"da kalıyor | Ödeme servisi webhook'u API'ye ulaştıramıyor; API açık mı, `Payments:WebhookUrl` doğru mu? |
-| E-posta gelmiyor | Bildirim servisi açık mı? RabbitMQ arayüzünde `notifications.email` kuyruğuna bakın. |
+| E-posta gelmiyor | Bildirim servisi açık mı? RabbitMQ arayüzünde (http://localhost:15680) `notifications.email` kuyruğuna bakın. |
 
 > Bu tablodaki hataların bazıları bölüm olarak da var. Takılırsanız önce burayı okuyun; hâlâ
 > çözülmüyorsa o büyük ihtimalle bölümün kendisidir.
