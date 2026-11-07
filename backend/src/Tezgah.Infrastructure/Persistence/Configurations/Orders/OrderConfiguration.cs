@@ -15,7 +15,6 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         b.Property(x => x.IdempotencyKey).HasMaxLength(64);
         b.HasIndex(x => new { x.UserId, x.IdempotencyKey }).IsUnique().HasFilter("idempotency_key IS NOT NULL");
         b.HasIndex(x => new { x.Status, x.CreatedAt }).HasFilter("status = 1");
-        b.HasIndex(x => new { x.UserId, x.PlacedAt });
         b.HasIndex(x => new { x.Status, x.PlacedAt });
         b.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
         b.OwnsOne(x => x.ShippingAddress, a => ConfigureAddress(a, "shipping"));
