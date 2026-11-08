@@ -265,28 +265,20 @@ public class OrderService(
             lastPaymentStatus == PaymentStatus.Failed);
     }
 
-    /// <summary>
-    /// Stoğu tek bir koşullu UPDATE ile ayırır. "Yeterli mi?" kontrolü ile düşüm aynı komutta olduğu için
-    /// aynı anda gelen iki sipariş son ürünü birlikte alamaz.
-    /// </summary>
+    /// <summary>Stoğu en çok ürünü olan depodan ayırır. Değişiklik siparişle birlikte kaydedilir.</summary>
     private async Task<long> ReserveStockAsync(long variantId, int quantity, CancellationToken ct)
     {
-        var candidates = await db.StockItems.AsNoTracking()
-            .Where(s => s.VariantId == variantId && s.Quantity - s.Reserved >= quantity)
+        var stock = await db.StockItems
+            .Where(s => s.VariantId == variantId)
             .OrderByDescending(s => s.Quantity - s.Reserved)
-            .Select(s => s.Id)
-            .ToListAsync(ct);
+            .FirstOrDefaultAsync(ct);
 
-        foreach (var stockItemId in candidates)
-        {
-            var updated = await db.StockItems
-                .Where(s => s.Id == stockItemId && s.Quantity - s.Reserved >= quantity)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(x => x.Reserved, x => x.Reserved + quantity)
-                    .SetProperty(x => x.UpdatedAt, clock.GetUtcNow()), ct);
-            if (updated == 1) return stockItemId;
-        }
-        throw new ConflictException("insufficient_stock", "Sepetinizdeki bir ürünün stoğu tükendi. Sepetinizi kontrol edin.");
+        if (stock is null || stock.Quantity - stock.Reserved < quantity)
+            throw new ConflictException("insufficient_stock", "Sepetinizdeki bir ürünün stoğu tükendi. Sepetinizi kontrol edin.");
+
+        stock.Reserved += quantity;
+        stock.UpdatedAt = clock.GetUtcNow();
+        return stock.Id;
     }
 
     private async Task SaveOrderAsync(CancellationToken ct)
