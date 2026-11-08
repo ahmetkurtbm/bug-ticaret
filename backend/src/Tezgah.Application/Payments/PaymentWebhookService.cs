@@ -19,8 +19,8 @@ public interface IPaymentWebhookService
 }
 
 /// <summary>
-/// Ödeme servisinden gelen olayları işler. Servis olayları en az bir kez gönderir; aynı EventId
-/// ikinci kez gelirse <see cref="ProcessedWebhookEvent"/> kaydı sayesinde hiçbir şey yapılmaz.
+/// Ödeme servisinden gelen olayları işler. Servis olayları en az bir kez gönderir; ödeme zaten
+/// işlenmişse olay yok sayılır.
 /// </summary>
 public class PaymentWebhookService(ITezgahDbContext db, TimeProvider clock, ILogger<PaymentWebhookService> logger) : IPaymentWebhookService
 {
@@ -28,15 +28,6 @@ public class PaymentWebhookService(ITezgahDbContext db, TimeProvider clock, ILog
     {
         var now = clock.GetUtcNow();
         await using var tx = await db.Database.BeginTransactionAsync(ct);
-
-        // Önce olay kimliğini yaz: aynı anda gelen iki kopyadan sadece biri bu satırı ekleyebilir.
-        var inserted = await db.Database.ExecuteSqlInterpolatedAsync(
-            $"INSERT INTO processed_webhook_events (event_id, source, processed_at) VALUES ({evt.EventId}, 'payments', {now}) ON CONFLICT (event_id) DO NOTHING", ct);
-        if (inserted == 0)
-        {
-            logger.LogInformation("Tekrarlanan ödeme olayı yok sayıldı {EventId}", evt.EventId);
-            return WebhookResult.Duplicate;
-        }
 
         var order = await db.Orders.Include(o => o.Items).SingleOrDefaultAsync(o => o.Id == evt.OrderId, ct);
         var providerId = evt.PaymentId.ToString();
@@ -47,6 +38,14 @@ public class PaymentWebhookService(ITezgahDbContext db, TimeProvider clock, ILog
             logger.LogWarning("Ödeme olayı bilinmeyen siparişe ait {EventId} {OrderId}", evt.EventId, evt.OrderId);
             await tx.CommitAsync(ct);
             return WebhookResult.Ignored;
+        }
+
+        // Ödeme daha önce sonuçlandıysa aynı olayın tekrarıdır.
+        if (payment is { Status: PaymentStatus.Succeeded or PaymentStatus.Failed })
+        {
+            logger.LogInformation("Tekrarlanan ödeme olayı yok sayıldı {EventId}", evt.EventId);
+            await tx.CommitAsync(ct);
+            return WebhookResult.Duplicate;
         }
 
         if (payment is null)
@@ -60,16 +59,10 @@ public class PaymentWebhookService(ITezgahDbContext db, TimeProvider clock, ILog
             payment.Status = PaymentStatus.Succeeded;
             payment.CompletedAt = evt.OccurredAt;
 
-            // Koşullu geçiş: bu arada süre dolumu siparişi iptal ettiyse ya da başka bir ödeme
-            // olayı onu zaten "ödendi" yaptıysa 0 satır etkilenir ve stok ikinci kez düşülmez.
-            var claimed = await db.Orders
-                .Where(o => o.Id == order.Id && o.Status == OrderStatus.PendingPayment && o.GrandTotal == evt.Amount)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(o => o.Status, OrderStatus.Paid)
-                    .SetProperty(o => o.PaidAt, evt.OccurredAt)
-                    .SetProperty(o => o.UpdatedAt, now), ct);
-            if (claimed == 1)
+            if (order.Status == OrderStatus.PendingPayment && order.GrandTotal == evt.Amount)
             {
+                order.Status = OrderStatus.Paid;
+                order.PaidAt = evt.OccurredAt;
                 db.OrderStatusHistory.Add(new OrderStatusHistory { OrderId = order.Id, FromStatus = OrderStatus.PendingPayment, ToStatus = OrderStatus.Paid, ChangedAt = now });
                 await OrderStockTransitions.CommitSaleAsync(db, order, now, ct);
 
