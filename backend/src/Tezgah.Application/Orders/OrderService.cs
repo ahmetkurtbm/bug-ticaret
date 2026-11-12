@@ -226,7 +226,7 @@ public class OrderService(
         var order = await db.Orders.AsNoTracking()
             .Include(o => o.Items)
             .Include(o => o.StatusHistory)
-            .SingleOrDefaultAsync(o => o.UserId == userId && o.OrderNumber == orderNumber, ct)
+            .SingleOrDefaultAsync(o => o.OrderNumber == orderNumber, ct)
             ?? throw new NotFoundException("Sipariş bulunamadı.");
 
         var variantIds = order.Items.Select(i => i.VariantId).ToList();
