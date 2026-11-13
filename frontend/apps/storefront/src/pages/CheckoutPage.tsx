@@ -178,7 +178,8 @@ function AddressForm({ onCreated, onCancel }: { onCreated: (a: Address) => void;
   const create = useMutation({
     mutationFn: addressApi.create,
     onSuccess: async (a) => {
-      await queryClient.invalidateQueries({ queryKey: addressesKey })
+      // Hesaba ait sorgular ['me', ...] altında; çıkışta tek seferde temizlenebilsin.
+      await queryClient.invalidateQueries({ queryKey: ['me', 'addresses'] })
       onCreated(a)
     },
   })
