@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tezgah.Application.Admin;
+using Tezgah.Application.Common.Exceptions;
 using Tezgah.Application.Common.Models;
 using Tezgah.Application.Reporting;
 using Tezgah.Domain.Catalog;
@@ -60,7 +61,18 @@ public class AdminController(IAdminService admin, IAdminOrderService orders, IRe
     public async Task<ActionResult<IReadOnlyList<AdminCouponDto>>> Coupons(CancellationToken ct) => Ok(await admin.ListCouponsAsync(ct));
 
     [HttpPost("coupons")]
-    public async Task<ActionResult<AdminCouponDto>> CreateCoupon(CreateCouponRequest request, CancellationToken ct) => Ok(await admin.CreateCouponAsync(request, ct));
+    public async Task<ActionResult<AdminCouponDto>> CreateCoupon(CreateCouponRequest request, CancellationToken ct)
+    {
+        // Panel uyarıyı tek alandan okuyabilsin: doğrulama mesajı düz metin olarak döner.
+        try
+        {
+            return Ok(await admin.CreateCouponAsync(request, ct));
+        }
+        catch (RequestValidationException ex)
+        {
+            return Ok(new { error = string.Join(" ", ex.Errors.SelectMany(e => e.Value)) });
+        }
+    }
 
     [HttpPost("coupons/{id:long}/activate")]
     public async Task<ActionResult<AdminCouponDto>> Activate(long id, CancellationToken ct) => Ok(await admin.SetCouponActiveAsync(id, true, ct));
