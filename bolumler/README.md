@@ -68,7 +68,7 @@ Aynı kontroller `main` dalında her zaman geçer.
 
 Seviye: ● ilk aylar · ●● ilk yıl · ●●● deneyimli geliştiricinin bile zorlandığı.
 
-Tüm hata türlerinin açıklamalı kataloğu: [HATALAR.md](../HATALAR.md).
+Tüm hata türlerinin açıklamalı kataloğu: [HATALAR.md](../docs/HATALAR.md).
 
 ---
 

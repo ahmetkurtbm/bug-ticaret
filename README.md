@@ -21,8 +21,8 @@ ve kontrol aracıyla doğrularsınız.
 | [Mimari](docs/MIMARI.md) | Monolit, Ödeme ve Bildirim servisleri, olay akışı, veri modeli |
 | [IDE rehberi](docs/IDE.md) | Visual Studio ve VS Code ile çalıştırma, kesme noktası, `.http` dosyaları |
 | [Bölümler](bolumler/README.md) | Hata senaryoları, nasıl başlanır, nasıl kontrol edilir |
-| [Hata kataloğu](HATALAR.md) | Şirketlerde sık görülen 108 hata: belirti, kök neden, nasıl bulunur |
-| [Plan](PLAN.md) | Proje kararları ve yol haritası |
+| [Hata kataloğu](docs/HATALAR.md) | Şirketlerde sık görülen 108 hata: belirti, kök neden, nasıl bulunur |
+| [Plan](docs/PLAN.md) | Proje kararları ve yol haritası |
 
 ## Hızlı başlangıç
 
