@@ -1,1 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#0f5f5a"/><path d="M9 11h14M16 11v12" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Bug Ticaret">
+  <rect width="512" height="512" rx="112" fill="#0f5f58"/>
+  <g stroke="#ffffff" stroke-width="20" stroke-linecap="round" fill="none">
+    <path d="M232 124 204 84M280 124 308 84"/>
+    <path d="M170 250 108 218M166 304 96 304M174 358 112 396"/>
+    <path d="M342 250 404 218M346 304 416 304M338 358 400 396"/>
+  </g>
+  <circle cx="256" cy="158" r="46" fill="#ffffff"/>
+  <ellipse cx="256" cy="298" rx="92" ry="122" fill="#ffffff"/>
+  <path d="M256 196V418" stroke="#0f5f58" stroke-width="12" stroke-linecap="round"/>
+</svg>
