@@ -25,7 +25,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tezgah -d tezgah"]
+      # -h 127.0.0.1: ilk açılışta geçici sunucu yalnızca soket dinler; TCP hazır olana dek "sağlıklı" sayılmaz.
+      test: ["CMD-SHELL", "pg_isready -U tezgah -d tezgah -h 127.0.0.1"]
       interval: 2s
       timeout: 3s
       retries: 30
@@ -63,6 +64,7 @@ services:
   # ---------------------------------------------------------------- uygulama (profile: app)
   api:
     profiles: ["app"]
+    restart: on-failure
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -89,6 +91,7 @@ services:
 
   payments:
     profiles: ["app"]
+    restart: on-failure
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -109,6 +112,7 @@ services:
 
   notifications:
     profiles: ["app"]
+    restart: on-failure
     build:
       context: ./backend
       dockerfile: Dockerfile
