@@ -194,29 +194,12 @@ gözlemlenebilirlik (OpenTelemetry), Redis önbellek, ikinci bölüm grubu, mobi
 ## İlk sürüm bölümleri (2026-11-10)
 
 Seçim ölçütü: her seviyeden örnek, en sık karşılaşılanlar önce, ve ilk aşamada yazılacak modüllerle
-(katalog, sepet, sipariş, ödeme servisi, satıcı paneli, kampanya, Docker) kurulabilmesi.
+kurulabilmesi. Katalogdan seçilen 19 hata türü (kod sırasıyla): API-01, API-02, API-03, ARAÇ-01,
+DB-01, EF-01, EŞ-01, EŞ-02, FE-01, FE-02, FE-03, FE-12, FE-14, NET-01, NET-02, NET-03, NET-09,
+NET-11, ORT-01.
 
-| Sıra | Kod | Hata | Seviye | Gereken modül |
-| --- | --- | --- | --- | --- |
-| 1 | ORT-01 | Container içinde localhost | 1 | Docker Compose |
-| 2 | FE-01 | Koşullu hook çağrısı | 1 | Ürün detay sayfası |
-| 3 | FE-12 | SPA sayfasında yenileyince 404 | 1 | Nginx |
-| 4 | API-01 | 400: doğrulama hatası okunmuyor | 1 | Satıcı başvuru formu |
-| 5 | API-03 | 401 ve 403 karışıklığı | 1 | Satıcı paneli |
-| 6 | NET-01 | CORS politikası çalışmıyor | 1 | API · satıcı paneli |
-| 7 | NET-02 | Middleware sırası | 1 | Bildirim servisi |
-| 8 | NET-03 | NullReferenceException (eski kayıt) | 1 | Fatura/sipariş özeti |
-| 9 | FE-02 | Sonsuz useEffect döngüsü | 1 | Kategori sayfası |
-| 10 | API-02 | Alan adı uyuşmazlığı | 1 | Sepette kupon |
-| 11 | FE-03 | Bayat state (stale closure) | 2 | Sepet adet butonu |
-| 12 | FE-14 | Türkçe ondalık virgül | 2 | Satıcı fiyat girişi |
-| 13 | NET-09 | Türkçe "i" problemi | 2 | Giriş (e-posta normalleştirme) |
-| 14 | NET-11 | DateTime.Now ve saat dilimi | 2 | Kampanya |
-| 15 | EF-01 | N+1 sorgu | 2 | Yönetim sipariş listesi |
-| 16 | ARAÇ-01 | git bisect ile hatayı bulmak | 2 | Kampanya geçmişi |
-| 17 | DB-01 | Eksik index (orta/büyük veri) | 3 | Müşteri sipariş geçmişi |
-| 18 | EŞ-01 | Son stoğu iki kişi alıyor | 3 | Stok/sipariş |
-| 19 | EŞ-02 | Ödeme bildirimi iki kez geliyor | 3 | Ödeme servisi |
+Bölüm numarası ile hata türü eşleşmesi öğrenciye ipucu vermemek için hiçbir öğrenci belgesinde
+yazılmaz; yalnızca her bölümün COZUM.md dosyasında ve bakım betiğinde bulunur.
 
 ## Verilen kararlar (2026-11-10)
 

@@ -21,14 +21,14 @@ public static class Commands
     public static int List(Repository repo, IReadOnlyList<Chapter> chapters)
     {
         var current = repo.CurrentBranch();
-        Output.Title($"{"No",-3} {"Kod",-8} {"Sv",-3} {"Başlık",-46} Modül");
+        Output.Title($"{"No",-3} {"Sv",-3} {"Hata kaydı",-56} Nerede");
         foreach (var c in chapters)
         {
             var mark = current == c.Branch || current == c.WorkBranch ? "►" : " ";
-            Console.WriteLine($"{mark}{c.No,-2} {c.Code,-8} {new string('●', c.Level),-3} {Truncate(c.Title, 46),-46} {c.Module}");
+            Console.WriteLine($"{mark}{c.No,-2} {new string('●', c.Level),-3} {Truncate(c.Title, 56),-56} {c.Module}");
         }
         Console.WriteLine();
-        Console.WriteLine("Başlamak için: baslat <no>   ·   Ayrıntı: bolumler/<no>-<kod>/KAYIT.md");
+        Console.WriteLine("Başlamak için: baslat <no>");
         return 0;
     }
 
@@ -49,7 +49,7 @@ public static class Commands
             : repo.Git($"switch -c {chapter.WorkBranch} {chapter.Branch}");
         if (result.ExitCode != 0) throw new BolumException(result.Output.Trim());
 
-        Output.Title($"Bölüm {chapter.No} · {chapter.Code} · {chapter.Title}");
+        Output.Title($"Bölüm {chapter.No} · {chapter.Title}");
         Output.Info($"Çalışma dalı: {chapter.WorkBranch} (kaynak: {chapter.Branch})");
         Output.Info($"Hata kaydı: bolumler/{chapter.Folder}/KAYIT.md");
         if (chapter.Setup.Length > 0)
@@ -86,7 +86,7 @@ public static class Commands
     public static async Task<int> CheckAsync(Repository repo, IReadOnlyList<Chapter> chapters, string? arg)
     {
         var chapter = ChapterCatalog.Find(chapters, arg, repo);
-        Output.Title($"Kontrol · Bölüm {chapter.No} · {chapter.Code} · {chapter.Title}");
+        Output.Title($"Kontrol · Bölüm {chapter.No} · {chapter.Title}");
         var check = Checks.For(chapter.Check);
         var context = new CheckContext(repo);
         bool passed;

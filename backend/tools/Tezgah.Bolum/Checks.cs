@@ -17,17 +17,17 @@ public static partial class Checks
     public static Func<CheckContext, Task<bool>> For(string id) => id switch
     {
         "ort01" => ContainerPaymentAsync,
-        "fe01" => c => FrontendTestAsync(c, "storefront", "fe01"),
+        "fe01" => c => FrontendTestAsync(c, "storefront", "b02", "Ürün sayfası hâlâ boş ekran veriyor."),
         "fe12" => SpaRefreshAsync,
-        "api01" => c => FrontendTestAsync(c, "seller", "api01"),
+        "api01" => c => FrontendTestAsync(c, "seller", "b04", "Başvuru formu hâlâ hangi bilginin yanlış olduğunu göstermiyor."),
         "api03" => SuspendedSellerAsync,
         "net01" => CorsAsync,
         "net02" => NotificationsApiKeyAsync,
         "net03" => OldOrderDetailAsync,
-        "fe02" => c => FrontendTestAsync(c, "storefront", "fe02"),
-        "api02" => c => FrontendTestAsync(c, "storefront", "api02"),
-        "fe03" => c => FrontendTestAsync(c, "storefront", "fe03"),
-        "fe14" => c => FrontendTestAsync(c, "seller", "fe14"),
+        "fe02" => c => FrontendTestAsync(c, "storefront", "b09", "Kategori sayfası hâlâ gereğinden fazla istek atıyor."),
+        "api02" => c => FrontendTestAsync(c, "storefront", "b10", "Kupon kodları hâlâ kabul edilmiyor."),
+        "fe03" => c => FrontendTestAsync(c, "storefront", "b11", "Adet düğmelerine art arda basınca sepete hâlâ yanlış adet kaydediliyor."),
+        "fe14" => c => FrontendTestAsync(c, "seller", "b12", "Bazı fiyat girişleri hâlâ yanlış tutara çevriliyor."),
         "net09" => TurkishLoginAsync,
         "net11" => CampaignDayBoundaryAsync,
         "ef01" => AdminOrderQueriesAsync,
@@ -39,7 +39,7 @@ public static partial class Checks
     };
 
     // ------------------------------------------------------------------ ortak
-    private static async Task<bool> FrontendTestAsync(CheckContext c, string app, string filter)
+    private static async Task<bool> FrontendTestAsync(CheckContext c, string app, string filter, string symptom)
     {
         var frontend = Path.Combine(c.Repo.Root, "frontend");
         if (!Directory.Exists(Path.Combine(frontend, "node_modules")))
@@ -47,16 +47,14 @@ public static partial class Checks
             Output.Info("frontend bağımlılıkları kuruluyor (npm install)…");
             Shell.Npm("install --no-audit --no-fund", frontend);
         }
-        Output.Info($"npm run test:bolum -w {app} -- {filter}");
+        // Test çıktısı gösterilmez: beklenen değerler cevabı ele verir. Yalnızca kullanıcının göreceği belirti yazılır.
         var result = Shell.Npm($"run test:bolum -w {app} -- {filter}", frontend, echo: false);
-        var summary = result.Output.Split('\n').Where(l => l.Contains("✓") || l.Contains("×") || l.Contains("FAIL") || l.Contains("AssertionError") || l.Contains("Error:") || l.Contains("Tests ")).Take(12);
-        foreach (var line in summary) Console.WriteLine("    " + line.Trim());
         if (result.ExitCode == 0)
         {
-            Output.Pass("Bölüm testi geçti.");
+            Output.Pass("Sorun giderilmiş görünüyor.");
             return true;
         }
-        Output.Fail("Bölüm testi başarısız. Ayrıntı: npm run test:bolum -w " + app + " -- " + filter);
+        Output.Fail(symptom);
         return false;
     }
 
@@ -82,7 +80,7 @@ public static partial class Checks
     private static Task<long> CancelTestOrderAsync(CheckContext c, string orderNumber) =>
         c.ScalarAsync<long>("SELECT id FROM orders WHERE order_number = @n", ("n", orderNumber));
 
-    // ------------------------------------------------------------------ ORT-01
+    // ------------------------------------------------------------------ Bölüm 1
     private static async Task<bool> ContainerPaymentAsync(CheckContext c)
     {
         var docker = Shell.Run("docker", "compose --profile app ps --format {{.Service}}:{{.State}}", c.Repo.Root);
@@ -99,15 +97,14 @@ public static partial class Checks
         if (order is null) return false;
         if (order.Value.CheckoutUrl is null)
         {
-            Output.Fail($"Sipariş {order.Value.OrderNumber} oluştu ama ödeme başlamadı: {order.Value.PaymentError}");
-            Output.Info("API container'ının loglarına bakın: docker compose logs api");
+            Output.Fail($"Sipariş {order.Value.OrderNumber} oluştu ama ödeme sayfası açılmadı. Müşterinin gördüğü: \"{order.Value.PaymentError}\"");
             return false;
         }
         Output.Pass($"Ödeme oturumu açıldı: {order.Value.CheckoutUrl}");
         return true;
     }
 
-    // ------------------------------------------------------------------ FE-12
+    // ------------------------------------------------------------------ Bölüm 3
     private static async Task<bool> SpaRefreshAsync(CheckContext c)
     {
         string body;
@@ -126,23 +123,23 @@ public static partial class Checks
 
         if (body.Contains("/@vite/client"))
         {
-            Output.Fail("5173 portunda Vite geliştirme sunucusu çalışıyor; o her adrese index.html döner ve hata görünmez.");
-            Output.Info("Geliştirme sunucusunu kapatıp container'ı başlatın: docker compose --profile app up -d --build storefront");
+            Output.Fail("Bu bölüm müşteri sitesinin container'da çalışmasını ister. npm run dev'i kapatıp şunu çalıştırın:");
+            Output.Info("docker compose --profile app up -d --build storefront");
             return false;
         }
 
         var ok = status == 200 && body.Contains("id=\"root\"");
-        if (ok) Output.Pass("/hesabim/siparisler doğrudan açılınca uygulama yükleniyor (200).");
-        else Output.Fail($"/hesabim/siparisler doğrudan açılınca {status} döndü.");
+        if (ok) Output.Pass("Sayfalar yenilenince açılıyor.");
+        else Output.Fail("Bir sayfa yenilenince ya da bağlantısı doğrudan açılınca hâlâ \"bulunamadı\" hatası çıkıyor.");
 
         using var asset = await c.Http.GetAsync($"{c.StorefrontUrl}/assets/olmayan-dosya-123.js");
         var assetOk = (int)asset.StatusCode == 404;
-        if (assetOk) Output.Pass("Olmayan bir dosya hâlâ 404 dönüyor.");
-        else Output.Fail($"Olmayan bir .js dosyası {(int)asset.StatusCode} döndü; her şeyi index.html'e yönlendirmek de hatadır.");
+        if (assetOk) Output.Pass("Olmayan dosyalar doğru şekilde \"bulunamadı\" dönüyor.");
+        else Output.Fail("Gerçekte olmayan bir dosya istendiğinde artık \"bulunamadı\" dönmüyor; bu da başka sorunlara yol açar.");
         return ok && assetOk;
     }
 
-    // ------------------------------------------------------------------ API-03
+    // ------------------------------------------------------------------ Bölüm 5
     private static async Task<bool> SuspendedSellerAsync(CheckContext c)
     {
         if (!await c.ApiIsUpAsync()) return false;
@@ -162,20 +159,20 @@ public static partial class Checks
 
         var active = await seller.GetAsync("/api/seller/dashboard");
         if (active.Status != 200) { Output.Fail($"Aktif mağaza paneli açamadı ({active.Status})."); return false; }
-        Output.Pass("Aktif mağaza paneli açıyor (200).");
+        Output.Pass("Aktif mağaza paneli açabiliyor.");
 
         await admin.PostAsync($"/api/admin/sellers/{sellerId}/suspend", new { note = "Bölüm kontrolü" });
         var suspended = await seller.GetAsync("/api/seller/dashboard");
         if (suspended.Status == 403)
         {
-            Output.Pass($"Askıdaki mağaza 403 alıyor: \"{suspended.Body?["title"]}\"");
+            Output.Pass($"Askıya alınan mağaza açıklayıcı bir yanıt alıyor: \"{suspended.Body?["title"]}\"");
             return true;
         }
-        Output.Fail($"Askıdaki mağaza {suspended.Status} aldı. Kimliği belli ama yetkisi olmayan kullanıcıya hangi kod dönmeli?");
+        Output.Fail("Askıya alınan mağazanın sahibi panelde hâlâ neden giremediğini göremiyor.");
         return false;
     }
 
-    // ------------------------------------------------------------------ NET-01
+    // ------------------------------------------------------------------ Bölüm 6
     private static async Task<bool> CorsAsync(CheckContext c)
     {
         if (!await c.ApiIsUpAsync()) return false;
@@ -188,20 +185,21 @@ public static partial class Checks
             request.Headers.Add("Access-Control-Request-Headers", "authorization");
             using var response = await c.Http.SendAsync(request);
             var allowed = response.Headers.TryGetValues("Access-Control-Allow-Origin", out var values) ? values.FirstOrDefault() : null;
-            if (allowed == origin) Output.Pass($"{origin} için ön kontrol (preflight) izin veriyor.");
-            else { Output.Fail($"{origin} için Access-Control-Allow-Origin: {allowed ?? "(yok)"}"); all = false; }
+            var name = origin.EndsWith("5173") ? "Müşteri sitesi" : origin.EndsWith("5174") ? "Satıcı paneli" : "Yönetim paneli";
+            if (allowed == origin) Output.Pass($"{name} API'den veri alabiliyor.");
+            else { Output.Fail($"{name} ({origin}) tarayıcıda API'den veri alamıyor."); all = false; }
         }
         return all;
     }
 
-    // ------------------------------------------------------------------ NET-02
+    // ------------------------------------------------------------------ Bölüm 7
     private static async Task<bool> NotificationsApiKeyAsync(CheckContext c)
     {
         try
         {
             using var health = await c.Http.GetAsync($"{c.NotificationsUrl}/health");
-            if (!health.IsSuccessStatusCode) { Output.Fail($"/health {(int)health.StatusCode} döndü; anahtarsız açık olmalı."); return false; }
-            Output.Pass("/health anahtarsız açık (200).");
+            if (!health.IsSuccessStatusCode) { Output.Fail("Bildirim servisinin sağlık kontrolü yanıt vermiyor."); return false; }
+            Output.Pass("Bildirim servisi çalışıyor.");
         }
         catch (HttpRequestException)
         {
@@ -211,47 +209,46 @@ public static partial class Checks
 
         using var anonymous = await c.Http.GetAsync($"{c.NotificationsUrl}/api/notifications");
         var anonOk = (int)anonymous.StatusCode == 401;
-        if (anonOk) Output.Pass("Anahtarsız /api/notifications 401.");
-        else Output.Fail($"Anahtarsız /api/notifications {(int)anonymous.StatusCode} döndü; müşteri e-postaları dışarı açık!");
+        if (anonOk) Output.Pass("Anahtarsız erişim reddediliyor.");
+        else Output.Fail("Bildirim kayıtları (müşteri e-postaları) hâlâ anahtarsız okunabiliyor.");
 
         using var request = new HttpRequestMessage(HttpMethod.Get, $"{c.NotificationsUrl}/api/notifications");
         request.Headers.Add("X-Api-Key", c.NotificationsApiKey);
         using var withKey = await c.Http.SendAsync(request);
         var keyOk = withKey.IsSuccessStatusCode;
-        if (keyOk) Output.Pass("Doğru anahtarla /api/notifications 200.");
-        else Output.Fail($"Doğru anahtarla {(int)withKey.StatusCode} döndü.");
+        if (keyOk) Output.Pass("Doğru anahtarla erişim çalışıyor.");
+        else Output.Fail("Doğru anahtarla da erişilemiyor.");
         return anonOk && keyOk;
     }
 
-    // ------------------------------------------------------------------ NET-03
+    // ------------------------------------------------------------------ Bölüm 8
     private static async Task<bool> OldOrderDetailAsync(CheckContext c)
     {
         if (!await c.ApiIsUpAsync()) return false;
         await using var conn = await c.OpenDbAsync();
         await using var cmd = new Npgsql.NpgsqlCommand("""
             SELECT o.order_number, u.email FROM orders o JOIN users u ON u.id = o.user_id
-             WHERE o.shipping_full_name IS NULL ORDER BY o.placed_at LIMIT 1
+             WHERE u.email = 'goksin.ozgorkey@mail.test' ORDER BY o.placed_at LIMIT 1
             """, conn);
         await using var reader = await cmd.ExecuteReaderAsync();
-        if (!await reader.ReadAsync()) { Output.Fail("Adres bilgisi olmayan eski sipariş bulunamadı; örnek veriyi yeniden üretin."); return false; }
+        if (!await reader.ReadAsync()) { Output.Fail("Kontrol için gereken örnek veri bulunamadı; örnek veriyi yeniden üretin."); return false; }
         var (orderNumber, email) = (reader.GetString(0), reader.GetString(1));
-        Output.Info($"Eski sipariş: {orderNumber} ({email})");
 
         var session = await c.RequireLoginAsync(email);
         var detail = await session.GetAsync($"/api/orders/{orderNumber}");
         if (detail.Status == 200)
         {
-            Output.Pass("Eski siparişin detayı açılıyor; adres yoksa boş geliyor.");
+            Output.Pass("Eski siparişlerin detayı açılıyor.");
             var list = await session.GetAsync("/api/orders?page=1&pageSize=50");
-            if (list.Status != 200) { Output.Fail($"Sipariş listesi {list.Status} döndü."); return false; }
-            Output.Pass("Sipariş listesi açılıyor.");
+            if (list.Status != 200) { Output.Fail("Siparişlerim sayfası açılmıyor."); return false; }
+            Output.Pass("Siparişlerim sayfası açılıyor.");
             return true;
         }
-        Output.Fail($"Eski siparişin detayı {detail.Status} döndü.");
+        Output.Fail("Bazı eski siparişlerin detayı hâlâ açılmıyor.");
         return false;
     }
 
-    // ------------------------------------------------------------------ NET-09
+    // ------------------------------------------------------------------ Bölüm 13
     private static async Task<bool> TurkishLoginAsync(CheckContext c)
     {
         if (!await c.ApiIsUpAsync()) return false;
@@ -263,12 +260,12 @@ public static partial class Checks
         }
         var fresh = $"ilkim.{Guid.NewGuid():N}"[..14] + "@tezgah.test";
         await c.RegisterAsync(fresh);
-        if (await c.LoginAsync(fresh.ToUpperInvariant()) is not null) Output.Pass("Yeni kayıt büyük harfle yazılan e-postayla da giriş yapabiliyor.");
-        else { Output.Fail("Yeni kayıt, e-postası büyük harfle yazılınca giriş yapamıyor."); all = false; }
+        if (await c.LoginAsync(fresh.ToUpperInvariant()) is not null) Output.Pass("Yeni açılan hesap giriş yapabiliyor.");
+        else { Output.Fail("Yeni açılan bir hesap giriş yapamıyor."); all = false; }
         return all;
     }
 
-    // ------------------------------------------------------------------ NET-11
+    // ------------------------------------------------------------------ Bölüm 14
     private static async Task<bool> CampaignDayBoundaryAsync(CheckContext c)
     {
         if (!await c.ApiIsUpAsync()) return false;
@@ -299,7 +296,7 @@ public static partial class Checks
         return okStart && okEnd;
     }
 
-    // ------------------------------------------------------------------ EF-01
+    // ------------------------------------------------------------------ Bölüm 15
     private static async Task<bool> AdminOrderQueriesAsync(CheckContext c)
     {
         if (!await c.ApiIsUpAsync()) return false;
@@ -316,16 +313,16 @@ public static partial class Checks
             return false;
         }
         var queries = int.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
-        Output.Info($"50 sipariş: {queries} SQL sorgusu, {watch.ElapsedMilliseconds} ms ({timing})");
-        if (queries <= 5) { Output.Pass("Sorgu sayısı satır sayısından bağımsız."); return true; }
-        Output.Fail("Sayfadaki her sipariş için ayrı sorgu çalışıyor (N+1).");
+        Output.Info($"50 siparişlik sayfa {watch.ElapsedMilliseconds} ms'de geldi.");
+        if (queries <= 5) { Output.Pass("Sipariş listesi sayfa büyüdükçe yavaşlamıyor."); return true; }
+        Output.Fail("Yönetim sipariş listesi hâlâ gereğinden fazla iş yapıyor; sayfa büyüdükçe yavaşlıyor.");
         return false;
     }
 
     [GeneratedRegex("desc=\"(\\d+) sorgu\"")]
     private static partial Regex QueryCountRegex();
 
-    // ------------------------------------------------------------------ ARAÇ-01
+    // ------------------------------------------------------------------ Bölüm 16
     private static async Task<bool> CampaignHistoryOrderAsync(CheckContext c)
     {
         if (!await c.ApiIsUpAsync()) return false;
@@ -357,7 +354,7 @@ public static partial class Checks
         return all;
     }
 
-    // ------------------------------------------------------------------ DB-01
+    // ------------------------------------------------------------------ Bölüm 17
     private static async Task<bool> OrderHistoryPlanAsync(CheckContext c)
     {
         var orders = await c.ScalarAsync<long>("SELECT count(*) FROM orders");
@@ -378,18 +375,19 @@ public static partial class Checks
         await using (var reader = await cmd.ExecuteReaderAsync())
             while (await reader.ReadAsync()) plan.AppendLine(reader.GetString(0));
         var text = plan.ToString();
-        foreach (var line in text.Split('\n').Take(8)) if (line.Trim().Length > 0) Console.WriteLine("    " + line.TrimEnd());
+        var time = Regex.Match(text, @"Execution Time: ([\d.]+) ms");
+        if (time.Success) Output.Info($"Siparişlerim sorgusu {time.Groups[1].Value} ms sürdü (en çok siparişi olan müşteri için).");
 
         if (text.Contains("Seq Scan on orders", StringComparison.Ordinal))
         {
-            Output.Fail("Sorgu orders tablosunun tamamını tarıyor (Seq Scan).");
+            Output.Fail("Siparişlerim sorgusu hâlâ gereğinden fazla iş yapıyor; veri büyüdükçe daha da yavaşlayacak.");
             return false;
         }
-        Output.Pass("Sorgu index kullanıyor; tablonun tamamı taranmıyor.");
+        Output.Pass("Siparişlerim sorgusu veri büyüse de hızlı kalacak biçimde çalışıyor.");
         return true;
     }
 
-    // ------------------------------------------------------------------ EŞ-01
+    // ------------------------------------------------------------------ Bölüm 18
     private static async Task<bool> LastStockRaceAsync(CheckContext c)
     {
         if (!await c.ApiIsUpAsync()) return false;
@@ -429,7 +427,7 @@ public static partial class Checks
 
             var state = await c.ScalarAsync<string>("SELECT quantity || ':' || reserved FROM stock_items WHERE id = @id", ("id", stockItemId));
             var parts = state!.Split(':').Select(int.Parse).ToArray();
-            Output.Info($"Başarılı sipariş: {created.Count}, stok tükendi (409): {rejected}{(others.Count > 0 ? ", diğer: " + string.Join(",", others) : "")}; stok (adet:ayrılan) {state}");
+            Output.Info($"Siparişi kabul edilen müşteri: {created.Count}, \"stok tükendi\" uyarısı alan: {rejected}");
             var ok = created.Count == 1 && parts[1] <= parts[0];
             if (ok) Output.Pass("Son ürünü yalnızca bir müşteri aldı.");
             else Output.Fail(created.Count > 1 ? $"Tek kalan ürün {created.Count} müşteriye satıldı." : "Hiçbir müşteri siparişi tamamlayamadı.");
@@ -445,7 +443,7 @@ public static partial class Checks
         }
     }
 
-    // ------------------------------------------------------------------ EŞ-02
+    // ------------------------------------------------------------------ Bölüm 19
     private static async Task<bool> DuplicateWebhookAsync(CheckContext c)
     {
         if (!await c.ApiIsUpAsync()) return false;
@@ -486,7 +484,6 @@ public static partial class Checks
         }).ToList();
         gate.SetResult();
         var statuses = await Task.WhenAll(sends);
-        Output.Info($"Webhook yanıtları: {string.Join(", ", statuses)}");
 
         var stockAfter = await c.ScalarAsync<int>("SELECT quantity FROM stock_items WHERE variant_id = @v", ("v", variant));
         var reservedAfter = await c.ScalarAsync<int>("SELECT reserved FROM stock_items WHERE variant_id = @v", ("v", variant));
@@ -495,16 +492,16 @@ public static partial class Checks
         var status = await c.ScalarAsync<int>("SELECT status FROM orders WHERE id = @id", ("id", orderId));
 
         var all = true;
-        if (status == 2) Output.Pass("Sipariş ödendi durumunda.");
-        else { Output.Fail($"Sipariş durumu {status}; 2 (ödendi) bekleniyordu."); all = false; }
-        if (stockBefore - stockAfter == 2) Output.Pass("Stok bir kez (2 adet) düştü.");
-        else { Output.Fail($"Stok {stockBefore - stockAfter} adet düştü; 2 bekleniyordu."); all = false; }
-        if (movements == 1 && paidHistory == 1) Output.Pass("Tek stok hareketi ve tek \"ödendi\" kaydı var.");
-        else { Output.Fail($"{movements} stok hareketi ve {paidHistory} \"ödendi\" kaydı oluştu; birer tane bekleniyordu."); all = false; }
-        if (reservedAfter == original[1] + 10) Output.Pass("Diğer müşterilerin ayırdığı 10 adet yerinde duruyor.");
-        else { Output.Fail($"Diğer müşterilerin ayırdığı adet {reservedAfter - original[1]} oldu; 10 bekleniyordu (başkalarının rezervasyonu düşüldü)."); all = false; }
-        if (statuses.All(s => s == 200)) Output.Pass("Tekrarlanan olaylar 200 ile yanıtlandı (gönderen tekrar denemeyi bırakır).");
-        else { Output.Fail("Bazı tekrarlar 200 dışında yanıt aldı; gönderen yeniden denemeye devam eder."); all = false; }
+        if (status == 2) Output.Pass("Sipariş \"ödendi\" durumunda.");
+        else { Output.Fail("Ödemesi alınan sipariş \"ödendi\" durumuna geçmedi."); all = false; }
+        if (stockBefore - stockAfter == 2) Output.Pass("Stok siparişteki adet kadar (2) düştü.");
+        else { Output.Fail($"Stok {stockBefore - stockAfter} adet düştü; siparişte 2 adet vardı."); all = false; }
+        if (movements == 1 && paidHistory == 1) Output.Pass("Sipariş geçmişi doğru görünüyor.");
+        else { Output.Fail($"Sipariş geçmişinde \"Ödendi\" {paidHistory} kez görünüyor."); all = false; }
+        if (reservedAfter == original[1] + 10) Output.Pass("Başka müşterilerin bekleyen siparişleri etkilenmedi.");
+        else { Output.Fail("Aynı ürünü bekleyen başka müşterilerin siparişleri için ayrılan ürünler eksildi."); all = false; }
+        if (statuses.All(s => s == 200)) Output.Pass("Ödeme servisi hata almadı.");
+        else { Output.Fail("Ödeme servisi bazı bildirimlerinde hata aldı."); all = false; }
         return all;
         }
         finally

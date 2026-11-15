@@ -17,7 +17,8 @@ public record Chapter(
     string Check,
     string[] Setup)
 {
-    public string Folder => $"{No:D2}-{Code.ToLowerInvariant().Replace("ç", "c").Replace("ş", "s").Replace("ğ", "g").Replace("ü", "u").Replace("ö", "o").Replace("ı", "i")}";
+    /// <summary>Klasör ve dal adı numara + nötr ad; hata türünü ele veren kod (ör. katalog kodu) kullanılmaz.</summary>
+    public string Folder => $"{No:D2}-{Slug}";
     public string Branch => $"bolum/{Folder}";
     public string WorkBranch => $"calisma/{Folder}";
 }

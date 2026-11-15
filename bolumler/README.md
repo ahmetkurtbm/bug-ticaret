@@ -16,7 +16,7 @@ Depo kökünden:
 
 ```bash
 dotnet run --project backend/tools/Tezgah.Bolum -- liste          # bölümler
-dotnet run --project backend/tools/Tezgah.Bolum -- baslat 8       # calisma/08-net-03 dalını açar
+dotnet run --project backend/tools/Tezgah.Bolum -- baslat 8       # calisma/08-eski-siparisler dalını açar
 dotnet run --project backend/tools/Tezgah.Bolum -- ipucu 8        # 1. ipucu (ipucu 8 2, ipucu 8 3)
 dotnet run --project backend/tools/Tezgah.Bolum -- kontrol        # bulunduğunuz dalın bölümünü kontrol eder
 dotnet run --project backend/tools/Tezgah.Bolum -- bitir          # main'e döner
@@ -26,7 +26,7 @@ dotnet run --project backend/tools/Tezgah.Bolum -- bitir          # main'e döne
 bölüm dalı bozulmaz, istediğiniz zaman baştan başlayabilirsiniz:
 
 ```bash
-git switch main && git branch -D calisma/08-net-03
+git switch main && git branch -D calisma/08-eski-siparisler
 ```
 
 Kontrol, hatanın **davranışını** sınar: kayıttaki senaryo artık doğru çalışıyor mu? Çoğu kontrol
@@ -44,27 +44,27 @@ Aynı kontroller `main` dalında her zaman geçer.
 
 ## Liste
 
-| No | Kod | Hata kaydı | Seviye | Nerede |
-| --- | --- | --- | --- | --- |
-| 1 | ORT-01 | [Docker'da ödeme başlamıyor](01-ort-01/KAYIT.md) | ● | Docker Compose · Ödeme |
-| 2 | FE-01 | [Ürün sayfası beyaz ekran veriyor](02-fe-01/KAYIT.md) | ● | Müşteri sitesi |
-| 3 | FE-12 | [Sayfayı yenileyince 404](03-fe-12/KAYIT.md) | ● | Nginx |
-| 4 | API-01 | [Başvuru formu neyin yanlış olduğunu söylemiyor](04-api-01/KAYIT.md) | ● | Satıcı paneli |
-| 5 | API-03 | [Askıya alınan satıcı neden giremediğini göremiyor](05-api-03/KAYIT.md) | ● | Satıcı paneli · Yetki |
-| 6 | NET-01 | [Satıcı paneli hiçbir veriyi yüklemiyor](06-net-01/KAYIT.md) | ● | API · CORS |
-| 7 | NET-02 | [Bildirim API'si anahtarsız açılıyor](07-net-02/KAYIT.md) | ● | Bildirim servisi |
-| 8 | NET-03 | [Bazı eski siparişlerin detayı açılmıyor](08-net-03/KAYIT.md) | ● | Sipariş detayı |
-| 9 | FE-02 | [Kategori sayfası durmadan istek atıyor](09-fe-02/KAYIT.md) | ● | Müşteri sitesi |
-| 10 | API-02 | [Hiçbir kupon kodu kabul edilmiyor](10-api-02/KAYIT.md) | ● | Sepet |
-| 11 | FE-03 | [Adet butonuna çok basınca sepet yanlış adet kaydediyor](11-fe-03/KAYIT.md) | ●● | Sepet |
-| 12 | FE-14 | [1.249,90 TL'lik ürün 1,25 TL'ye satılıyor](12-fe-14/KAYIT.md) | ●● | Satıcı paneli · Fiyat |
-| 13 | NET-09 | [Eski kullanıcılar giriş yapamıyor](13-net-09/KAYIT.md) | ●● | Kimlik doğrulama |
-| 14 | NET-11 | [Gece yarısı başlaması gereken kampanya 03:00'te başladı](14-net-11/KAYIT.md) | ●● | Kampanya |
-| 15 | EF-01 | [Yönetim sipariş listesi çok yavaş](15-ef-01/KAYIT.md) | ●● | Yönetim paneli |
-| 16 | ARAÇ-01 | [Kampanya geçmişi bir süredir yanlış gösteriliyor](16-arac-01/KAYIT.md) | ●● | git bisect |
-| 17 | DB-01 | [Siparişlerim sayfası saniyelerce bekliyor](17-db-01/KAYIT.md) | ●●● | Veritabanı |
-| 18 | EŞ-01 | [Son ürün iki müşteriye satıldı](18-es-01/KAYIT.md) | ●●● | Stok · Eşzamanlılık |
-| 19 | EŞ-02 | [Bazı siparişlerde stok iki kez düşmüş](19-es-02/KAYIT.md) | ●●● | Ödeme webhook'u |
+| No | Hata kaydı | Seviye | Nerede görülüyor |
+| --- | --- | --- | --- |
+| 1 | [Docker'da ödeme başlamıyor](01-docker-odeme/KAYIT.md) | ● | Müşteri sitesi · Ödeme |
+| 2 | [Ürün sayfası beyaz ekran veriyor](02-urun-sayfasi/KAYIT.md) | ● | Müşteri sitesi · Ürün sayfası |
+| 3 | [Sayfayı yenileyince 404](03-sayfa-yenileme/KAYIT.md) | ● | Müşteri sitesi |
+| 4 | [Başvuru formu neyin yanlış olduğunu söylemiyor](04-satici-basvurusu/KAYIT.md) | ● | Satıcı paneli · Başvuru |
+| 5 | [Askıya alınan satıcı neden giremediğini göremiyor](05-askidaki-satici/KAYIT.md) | ● | Satıcı paneli |
+| 6 | [Satıcı paneli hiçbir veriyi yüklemiyor](06-satici-paneli-bos/KAYIT.md) | ● | Satıcı paneli |
+| 7 | [Bildirim API'si anahtarsız açılıyor](07-bildirim-guvenligi/KAYIT.md) | ● | Bildirim servisi |
+| 8 | [Bazı eski siparişlerin detayı açılmıyor](08-eski-siparisler/KAYIT.md) | ● | Müşteri sitesi · Siparişlerim |
+| 9 | [Kategori sayfası durmadan istek atıyor](09-kategori-sayfasi/KAYIT.md) | ● | Müşteri sitesi · Kategori sayfası |
+| 10 | [Hiçbir kupon kodu kabul edilmiyor](10-kupon-kodu/KAYIT.md) | ● | Müşteri sitesi · Sepet |
+| 11 | [Adet butonuna çok basınca sepet yanlış adet kaydediyor](11-sepet-adedi/KAYIT.md) | ●● | Müşteri sitesi · Sepet |
+| 12 | [1.249,90 TL'lik ürün 1,25 TL'ye satılıyor](12-urun-fiyati/KAYIT.md) | ●● | Satıcı paneli · Ürünler |
+| 13 | [Eski kullanıcılar giriş yapamıyor](13-giris-yapilamiyor/KAYIT.md) | ●● | Giriş |
+| 14 | [Gece yarısı başlaması gereken kampanya 03:00'te başladı](14-kampanya-saati/KAYIT.md) | ●● | Yönetim paneli · Kampanyalar |
+| 15 | [Yönetim sipariş listesi çok yavaş](15-yonetim-siparisleri/KAYIT.md) | ●● | Yönetim paneli · Siparişler |
+| 16 | [Kampanya geçmişi bir süredir yanlış gösteriliyor](16-kampanya-gecmisi/KAYIT.md) | ●● | Yönetim paneli · Kampanyalar |
+| 17 | [Siparişlerim sayfası saniyelerce bekliyor](17-siparislerim-yavas/KAYIT.md) | ●●● | Müşteri sitesi · Siparişlerim |
+| 18 | [Son ürün iki müşteriye satıldı](18-son-urun/KAYIT.md) | ●●● | Müşteri sitesi · Sipariş |
+| 19 | [Bazı siparişlerde stok iki kez düşmüş](19-stok-dusumu/KAYIT.md) | ●●● | Sipariş · Stok |
 
 Seviye: ● ilk aylar · ●● ilk yıl · ●●● deneyimli geliştiricinin bile zorlandığı.
 

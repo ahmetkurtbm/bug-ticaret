@@ -76,9 +76,9 @@ public partial class DataGenerator
             if (status == OrderStatus.PendingPayment) paidAt = null;
             var cancelledAt = status == OrderStatus.Cancelled ? placedAt.AddHours(_rng.Next(1, 72)) : (DateTime?)null;
 
-            // Eski sistemden taşınan siparişlerin bir kısmında adres yok (bilerek kirli; NET-03)
-            var legacyNoAddress = ageDays > 540 && Chance(0.04);
-            var addr = legacyNoAddress ? null : customer;
+            // 2024 öncesi siparişler eski sistemden aktarıldı; aktarım bazı kayıtları eksik taşıdı.
+            var importedIncomplete = ageDays > 540 && Chance(0.04);
+            var addr = importedIncomplete ? null : customer;
             var billingSame = !Chance(0.1);
 
             await orders.RowAsync(orderId, $"TZ-{placedAt.Year}-{orderId:D7}", customer.Id, (int)status,
