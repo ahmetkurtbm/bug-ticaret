@@ -22,6 +22,10 @@ Alttaki panelde **Ports** (Bağlantı noktaları) sekmesine geçin. Her satırda
 
 Satırın üstüne gelip **küre simgesine** (Open in Browser) tıklayın; site yeni sekmede açılır.
 
+Ödeme sayfası ilk açıldığında GitHub *"You are about to access a development port served by someone's
+codespace"* diye bir uyarı gösterir. Bu sizin kendi Codespace'iniz; **Continue** deyin. Uyarı her
+Codespace oturumunda bir kez çıkar.
+
 Hesaplar (şifre hepsinde `Tezgah123!`): `musteri@tezgah.test`, `satici@tezgah.test`,
 `admin@tezgah.test`. Ödeme sayfasında SMS kodu `123456`.
 
