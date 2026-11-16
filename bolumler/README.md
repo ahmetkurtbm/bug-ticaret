@@ -33,6 +33,9 @@ Kontrol, hatanın **davranışını** sınar: kayıttaki senaryo artık doğru �
 çalışan servislere istek atar (önce servisleri başlatın), frontend bölümleri bir test çalıştırır.
 Aynı kontroller `main` dalında her zaman geçer.
 
+> **Codespaces'te çalışıyorsanız:** Bölüm 6 orada tekrar etmez; onu kendi bilgisayarınızda çözün.
+> Diğer bölümler aynı şekilde çalışır ([docs/CODESPACES.md](../docs/CODESPACES.md)).
+
 ## Kurallar ve öneriler
 
 - **`git diff main` yapmayın.** Gerçek hayatta "doğru sürüm" diye bir dal yoktur. Ama `git log`,

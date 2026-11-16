@@ -77,7 +77,8 @@
     "module": "Satıcı paneli",
     "check": "net01",
     "setup": [
-      "Satıcı paneline (http://localhost:5174) satici@tezgah.test ile girin"
+      "Satıcı paneline (http://localhost:5174) satici@tezgah.test ile girin",
+      "Bu bölüm Codespaces'te tekrar etmez; kendi bilgisayarınızda çözün (docs/BASLARKEN.md)"
     ]
   },
   {

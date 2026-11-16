@@ -1,0 +1,47 @@
+// GitHub Codespaces (ve VS Code Dev Containers) ayarı.
+// README'deki "Open in GitHub Codespaces" düğmesi bu dosyayı kullanır: Docker, .NET 10 ve Node 22
+// kurulu bir makine açılır, ilk açılışta sistem derlenip örnek veri üretilir.
+{
+  "name": "bug-ticaret",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/dotnet:2": { "version": "10.0" },
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  // Veritabanı, kuyruk, üç servis ve üç site aynı anda çalışır.
+  "hostRequirements": { "cpus": 4, "memory": "8gb", "storage": "32gb" },
+
+  "forwardPorts": [5173, 5174, 5175, 5080, 5090, 8025],
+  "portsAttributes": {
+    "5173": { "label": "Müşteri sitesi", "onAutoForward": "notify" },
+    "5174": { "label": "Satıcı paneli", "onAutoForward": "silent" },
+    "5175": { "label": "Yönetim paneli", "onAutoForward": "silent" },
+    "5080": { "label": "API", "onAutoForward": "silent" },
+    "5090": { "label": "Ödeme servisi", "onAutoForward": "silent" },
+    "8025": { "label": "E-postalar (Mailpit)", "onAutoForward": "silent" }
+  },
+  "otherPortsAttributes": { "onAutoForward": "ignore" },
+
+  // İlk oluşturmada bir kez: adresleri yaz, bağımlılıkları kur, sistemi derleyip başlat.
+  "postCreateCommand": "bash .devcontainer/hazirla.sh",
+  // Her açılışta (durdurulup yeniden başlatılınca da): sistemi ayağa kaldır.
+  "postStartCommand": "bash .devcontainer/baslat.sh",
+
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["docs/CODESPACES.md"]
+    },
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-azuretools.vscode-containers",
+        "oxc.oxc-vscode",
+        "bradlc.vscode-tailwindcss",
+        "humao.rest-client"
+      ]
+    }
+  }
+}

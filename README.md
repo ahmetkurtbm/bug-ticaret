@@ -13,7 +13,15 @@ veritabanı vardır. `main` dalı her zaman doğru çalışan koddur. Her hata *
 dala geçersiniz, hata kaydını okursunuz, hatayı tekrar edersiniz, kaynağını bulursunuz, düzeltirsiniz
 ve kontrol aracıyla doğrularsınız.
 
-> **İlk kez mi geldiniz?** [Başlarken](docs/BASLARKEN.md) sayfası sizi sıfırdan ilk bölüme kadar adım adım götürür.
+## Hemen deneyin
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/ahmetkurtbm/bug-ticaret?quickstart=1)
+
+**Kurulum yok:** düğmeye basın, tarayıcıda hazır bir geliştirme ortamı açılır ve sistem kendiliğinden
+kurulur. Açılan rehber ([docs/CODESPACES.md](docs/CODESPACES.md)) gerisini anlatır. GitHub hesabı
+gerekir; ücretsiz hesapların aylık kotası birçok bölümü çözmeye yeter.
+
+**Kendi bilgisayarınızda:** [Başlarken](docs/BASLARKEN.md) sayfası sizi sıfırdan ilk bölüme kadar adım adım götürür.
 
 ## İçindekiler
 

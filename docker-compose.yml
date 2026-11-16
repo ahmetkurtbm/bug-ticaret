@@ -8,6 +8,9 @@
 #
 # İkisini aynı anda çalıştırmayın: aynı portları kullanırlar (5080, 5090, 5095, 5173-5175).
 #
+# Tarayıcının kullandığı adresler varsayılan olarak http://localhost:PORT. GitHub Codespaces'te
+# .devcontainer/hazirla.sh bunları o Codespace'in adresleriyle .env dosyasına yazar (PUBLIC_*_URL).
+#
 # Container içinde "localhost" container'ın kendisidir. Servisler birbirine servis adıyla ulaşır
 # (http://payments:8080). Tarayıcı ise bilgisayarın portlarından ulaşır (http://localhost:5080).
 
@@ -78,6 +81,11 @@ services:
       Payments__BaseUrl: http://payments:8080
       RabbitMq__HostName: rabbitmq
       RabbitMq__Port: "5672"
+      # Codespaces'te tarayıcı siteleri farklı adreslerden açar; yerelde bunlar zaten listede olan adreslerdir.
+      Cors__AllowedOrigins__3: ${PUBLIC_STOREFRONT_URL:-http://localhost:5173}
+      Cors__AllowedOrigins__4: ${PUBLIC_SELLER_URL:-http://localhost:5173}
+      Cors__AllowedOrigins__5: ${PUBLIC_ADMIN_URL:-http://localhost:5173}
+      Orders__StorefrontBaseUrl: ${PUBLIC_STOREFRONT_URL:-http://localhost:5173}
     ports:
       - "127.0.0.1:5080:8080"
     depends_on:
@@ -103,7 +111,7 @@ services:
       ConnectionStrings__Payments: Host=postgres;Port=5432;Database=tezgah_payments;Username=tezgah;Password=tezgah
       Payments__WebhookUrl: http://api:8080/api/payments/webhook
       # Müşterinin tarayıcısı ödeme sayfasını bu adresten açar.
-      Payments__PublicBaseUrl: http://localhost:5090
+      Payments__PublicBaseUrl: ${PUBLIC_PAYMENTS_URL:-http://localhost:5090}
     ports:
       - "127.0.0.1:5090:8080"
     depends_on:
@@ -152,7 +160,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args: { APP: storefront }
+      args: { APP: storefront, VITE_API_URL: "${PUBLIC_API_URL:-http://localhost:5080}" }
     ports:
       - "127.0.0.1:5173:80"
 
@@ -161,7 +169,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args: { APP: seller }
+      args: { APP: seller, VITE_API_URL: "${PUBLIC_API_URL:-http://localhost:5080}" }
     ports:
       - "127.0.0.1:5174:80"
 
@@ -170,7 +178,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args: { APP: admin }
+      args: { APP: admin, VITE_API_URL: "${PUBLIC_API_URL:-http://localhost:5080}" }
     ports:
       - "127.0.0.1:5175:80"
 

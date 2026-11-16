@@ -21,3 +21,6 @@ Thumbs.db
 .claude/
 AGENTS.md
 CLAUDE.md
+
+# Ortama özel adresler (Codespaces'te .devcontainer/hazirla.sh yazar)
+.env

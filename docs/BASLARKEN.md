@@ -1,5 +1,7 @@
 # Başlarken: sıfırdan ilk bölüme
 
+> Hiçbir şey kurmadan tarayıcıdan çalışmak isterseniz: [Codespaces'te çalışmak](CODESPACES.md).
+
 Bu sayfa projeyi ilk kez indiren biri için yazıldı. Sırayla gidin; her adımda ne yaptığınızı ve
 neden yaptığınızı anlatır. Ayrıntılar için: [Kurulum](KURULUM.md), [IDE rehberi](IDE.md).
 
