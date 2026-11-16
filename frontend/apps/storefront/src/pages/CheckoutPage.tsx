@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useRef, useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { ApiError } from '../api/client'
 import { addressApi, orderApi } from '../api/orders'
@@ -20,20 +20,15 @@ export function CheckoutPage() {
   const [adding, setAdding] = useState(false)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  // Aynı ödeme denemesinde anahtar sabit: butona iki kez basılsa da tek sipariş açılır.
-  const idempotencyKey = useRef(crypto.randomUUID())
 
   const place = useMutation({
-    mutationFn: (addressId: number) => orderApi.place(addressId, installments, idempotencyKey.current),
+    // Her deneme kendi anahtarıyla gider; Safari'de geri tuşuyla dönülünce eski anahtar takılı kalıyordu.
+    mutationFn: (addressId: number) => orderApi.place(addressId, installments, crypto.randomUUID()),
     onSuccess: (result) => {
       void queryClient.invalidateQueries({ queryKey: cartQueryKey })
       void queryClient.invalidateQueries({ queryKey: ['orders'] })
       if (result.checkoutUrl) window.location.assign(result.checkoutUrl)
       else navigate(`/hesabim/siparisler/${result.orderNumber}`, { state: { paymentError: result.paymentError } })
-    },
-    onError: () => {
-      // Sipariş açılamadıysa yeni deneme yeni anahtarla gider.
-      idempotencyKey.current = crypto.randomUUID()
     },
   })
 
@@ -58,7 +53,7 @@ export function CheckoutPage() {
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
-    if (effectiveId !== null && !place.isPending) place.mutate(effectiveId)
+    if (effectiveId !== null) place.mutate(effectiveId)
   }
 
   return (
@@ -144,7 +139,7 @@ export function CheckoutPage() {
           )}
           <button
             type="submit"
-            disabled={effectiveId === null || place.isPending || place.isSuccess}
+            disabled={effectiveId === null}
             className="mt-4 w-full rounded-lg bg-brand-700 py-3 font-semibold text-white disabled:opacity-60"
           >
             {place.isPending || place.isSuccess ? 'Ödeme sayfasına yönlendiriliyor…' : 'Ödemeye geç'}
