@@ -23,13 +23,15 @@ public class DapperReportingQueries(NpgsqlDataSource dataSource) : IReportingQue
         const string range = "o.paid_at >= (@from AT TIME ZONE @tz) AND o.paid_at < (@toExclusive AT TIME ZONE @tz)";
 
         var summary = await conn.QuerySingleAsync<SummaryRow>(new CommandDefinition($"""
-            SELECT count(*)::int                                   AS order_count,
+            SELECT count(DISTINCT o.id)::int                       AS order_count,
                    coalesce(sum(o.grand_total), 0)                AS revenue,
                    coalesce(avg(o.grand_total), 0)                AS average_order_value,
                    coalesce((SELECT sum(round(oi.line_total * oi.commission_rate / 100, 2))
                                FROM order_items oi JOIN orders o ON o.id = oi.order_id
-                              WHERE o.status IN {SoldStatuses} AND {range}), 0) AS commission
+                              WHERE o.status IN {SoldStatuses} AND {range}), 0) AS commission,
+                   coalesce(sum(oi.quantity), 0)::int             AS items_sold
               FROM orders o
+              JOIN order_items oi ON oi.order_id = o.id
              WHERE o.status IN {SoldStatuses} AND {range}
             """, args, cancellationToken: ct));
 
@@ -82,6 +84,6 @@ public class DapperReportingQueries(NpgsqlDataSource dataSource) : IReportingQue
             daily, categories, sellers);
     }
 
-    private sealed record SummaryRow(int OrderCount, decimal Revenue, decimal AverageOrderValue, decimal Commission);
+    private sealed record SummaryRow(int OrderCount, decimal Revenue, decimal AverageOrderValue, decimal Commission, int ItemsSold);
     private sealed record DailyRow(DateOnly Day, int OrderCount, decimal Revenue); // Npgsql date sütununu DateOnly olarak okur
 }
