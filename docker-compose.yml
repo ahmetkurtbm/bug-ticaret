@@ -67,7 +67,6 @@ services:
   # ---------------------------------------------------------------- uygulama (profile: app)
   api:
     profiles: ["app"]
-    restart: on-failure
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -99,7 +98,6 @@ services:
 
   payments:
     profiles: ["app"]
-    restart: on-failure
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -120,7 +118,6 @@ services:
 
   notifications:
     profiles: ["app"]
-    restart: on-failure
     build:
       context: ./backend
       dockerfile: Dockerfile

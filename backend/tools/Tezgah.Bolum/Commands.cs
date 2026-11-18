@@ -21,14 +21,16 @@ public static class Commands
     public static int List(Repository repo, IReadOnlyList<Chapter> chapters)
     {
         var current = repo.CurrentBranch();
-        Output.Title($"{"No",-3} {"Sv",-3} {"Hata kaydı",-56} Nerede");
+        var solved = Progress.Load(repo);
+        Output.Title($"{"No",-3} {"",-2}{"Sv",-4}{"Hata kaydı",-56} Nerede");
         foreach (var c in chapters)
         {
             var mark = current == c.Branch || current == c.WorkBranch ? "►" : " ";
-            Console.WriteLine($"{mark}{c.No,-2} {new string('●', c.Level),-3} {Truncate(c.Title, 56),-56} {c.Module}");
+            var done = solved.ContainsKey(c.No) ? "✔ " : "  ";
+            Console.WriteLine($"{mark}{c.No,-2} {done}{new string('●', c.Level),-4}{Truncate(c.Title, 56),-56} {c.Module}");
         }
         Console.WriteLine();
-        Console.WriteLine("Başlamak için: baslat <no>");
+        Console.WriteLine($"Çözülen: {solved.Count}/{chapters.Count}   ·   Başlamak için: baslat <no>");
         return 0;
     }
 
@@ -50,6 +52,8 @@ public static class Commands
         if (result.ExitCode != 0) throw new BolumException(result.Output.Trim());
 
         Output.Title($"Bölüm {chapter.No} · {chapter.Title}");
+        if (Progress.Load(repo).TryGetValue(chapter.No, out var solvedAt))
+            Output.Info($"Bu bölümü {solvedAt:dd.MM.yyyy} tarihinde çözdünüz; tekrar çözebilirsiniz.");
         Output.Info($"Çalışma dalı: {chapter.WorkBranch} (kaynak: {chapter.Branch})");
         Output.Info($"Hata kaydı: bolumler/{chapter.Folder}/KAYIT.md");
         if (chapter.Setup.Length > 0)
@@ -110,6 +114,7 @@ public static class Commands
         Console.WriteLine();
         if (passed)
         {
+            Progress.MarkSolved(repo, chapter.No);
             Output.Pass("Bölüm tamamlandı. Çözümü karşılaştırın: bolumler/" + chapter.Folder + "/COZUM.md");
             return 0;
         }

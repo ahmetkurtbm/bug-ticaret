@@ -18,6 +18,7 @@ public class ProductSearchQuery
 {
     public string? Category { get; set; }
     public string? Brand { get; set; }
+    public string? Seller { get; set; }
     public string? Q { get; set; }
     public decimal? MinPrice { get; set; }
     public decimal? MaxPrice { get; set; }
@@ -43,6 +44,8 @@ public record VariantDto(
 public record ProductAttributeDto(string Name, string Value, string? Unit);
 
 public record SellerSummaryDto(long Id, string StoreName, string Slug, decimal Rating, int RatingCount);
+
+public record SellerPublicDto(string Slug, string StoreName, decimal Rating, int RatingCount);
 
 public record ProductDetailDto(
     long Id,

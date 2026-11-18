@@ -83,7 +83,7 @@ function ProductView({ product }: { product: ProductDetail }) {
             <h1 className="text-2xl font-bold leading-tight">{product.name}</h1>
             <div className="mt-2 flex items-center gap-3 text-sm">
               {product.reviewCount > 0 && <Rating value={product.rating} count={product.reviewCount} />}
-              <span className="text-muted">Satıcı: <strong className="text-ink">{product.seller.storeName}</strong></span>
+              <span className="text-muted">Satıcı: <Link to={`/magaza/${product.seller.slug}`} className="font-semibold text-ink hover:text-brand-700">{product.seller.storeName}</Link></span>
             </div>
           </div>
 

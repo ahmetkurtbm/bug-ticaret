@@ -1,5 +1,7 @@
 > **Cevap anahtarı.** Bölümü kendiniz çözmeden okumayın; önce `ipucu` komutunu deneyin.
 
+> Not: commit kimlikleri (hash) dalın üretildiği ana göre değişir. Bu belgedeki `abc1234` gibi kimlikler yer tutucudur; sizdekini `git log --oneline` ile görün.
+
 # Çözüm · Bölüm 16 (ARAÇ-01) · "Dün çalışıyordu": hatayı getiren commit
 
 ## Kök neden
@@ -16,7 +18,7 @@ await db.AuditLogs.AsNoTracking()
 
 `OrderBy(a => a.Id)` eskiden yeniye sıralar. Ardından gelen `Take(n)` ilk n kaydı alır; yani **en eski** n kaydı. Panel 50 kayıt ister (`take=50`). Denetim kaydı (`audit_logs`) 50'yi geçtiğinde en yeni işlemler listeye hiç girmez. 50'den azken hepsi gelir ama en yeni en altta durur. Sorgu hata vermez, kayıtlar doğrudur; yalnızca hangilerinin ve hangi sırayla geldiği yanlıştır. Sessiz hata budur.
 
-Değişikliği yapan geliştirici şunu düşünmüş (commit `99bca3f`, Emre Şahin, 31 Ekim):
+Değişikliği yapan geliştirici şunu düşünmüş (commit `abc1234`, Emre Şahin, 31 Ekim):
 
 > Kampanya geçmişi sorgusu sadeleştirildi
 > Kupon kodu ve işlemi yapan kişi tek projeksiyonda; sıralama birincil anahtara göre.
@@ -65,7 +67,7 @@ Her adımda:
 12 aday için en fazla 4 adım gerekir (log₂ 12 ≈ 3,6). Sonunda git şunu yazar:
 
 ```text
-99bca3f... is the first bad commit
+abc1234... is the first bad commit
 ```
 
 Bitirince mutlaka `git bisect reset` çalıştırıp dalınıza dönün. Gidişatı `git bisect log` ile görebilir, yanlış bir yanıt verdiyseniz `git bisect log > kayit.txt`, dosyayı düzenleyip `git bisect replay kayit.txt` ile tekrar oynatabilirsiniz.
@@ -99,7 +101,7 @@ git bisect reset
 ### 4. Bulunan commit'i okuyun
 
 ```bash
-git show 99bca3f
+git show abc1234
 ```
 
 Diff tek satırdır: `OrderByDescending(CreatedAt).ThenByDescending(Id)` → `OrderBy(Id)`. Commit mesajının "sıralama birincil anahtara göre" cümlesi niyeti anlatır ama yönü söylemez. Bisect size "hangi commit" cevabını verir, "neden" cevabını siz okuyarak bulursunuz. Hash'ler dal yeniden kurulursa değişir; bu belgedeki hash'i değil bisect'in bulduğunu esas alın.
@@ -109,10 +111,10 @@ Diff tek satırdır: `OrderByDescending(CreatedAt).ThenByDescending(Id)` → `Or
 | Yol | Ne zaman |
 | --- | --- |
 | `git bisect` | Neyin bozulduğunu bilmiyorsunuz, yalnızca "şu test geçiyordu, şimdi geçmiyor" diyebiliyorsunuz. En genel yöntem. |
-| `git log -S"OrderByDescending(a => a.CreatedAt)" -- backend/src/Tezgah.Application/Admin/AdminService.cs` | Koddan kaybolan ya da eklenen bir metni biliyorsunuz (pickaxe). Bu metnin sayısını değiştiren commit'leri listeler: yukarıdaki arama `99bca3f`'yi verir. |
+| `git log -S"OrderByDescending(a => a.CreatedAt)" -- backend/src/Tezgah.Application/Admin/AdminService.cs` | Koddan kaybolan ya da eklenen bir metni biliyorsunuz (pickaxe). Bu metnin sayısını değiştiren commit'leri listeler: yukarıdaki arama `abc1234`'yi verir. |
 | `git log -L :CampaignHistoryAsync:backend/src/Tezgah.Application/Admin/AdminService.cs` | Bir fonksiyonun tüm geçmişini diff'leriyle görmek istiyorsunuz. |
-| `git blame -L 205,220 backend/src/Tezgah.Application/Admin/AdminService.cs` | Şüpheli satırı biliyorsunuz; her satırı en son değiştiren commit'i gösterir. `.OrderBy(a => a.Id)` satırı `99bca3f`'yi gösterir. Satır sonradan başka bir commit'le (biçimlendirme) değişmişse yanlış kişiyi gösterebilir; `-w` ve `-M` ile boşluk ve taşıma değişikliklerini yok sayın. |
-| `git log -- <dosya>` | Dosya biliniyorsa en hızlı ilk adım. Burada `AdminService.cs` için üç commit çıkar (`67a730b`, `99bca3f`, `d3c0887`); hangisinin bozduğunu yine test söyler. |
+| `git blame -L 205,220 backend/src/Tezgah.Application/Admin/AdminService.cs` | Şüpheli satırı biliyorsunuz; her satırı en son değiştiren commit'i gösterir. `.OrderBy(a => a.Id)` satırı `abc1234`'yi gösterir. Satır sonradan başka bir commit'le (biçimlendirme) değişmişse yanlış kişiyi gösterebilir; `-w` ve `-M` ile boşluk ve taşıma değişikliklerini yok sayın. |
+| `git log -- <dosya>` | Dosya biliniyorsa en hızlı ilk adım. Burada `AdminService.cs` için üç commit çıkar (`aaa1111`, `abc1234`, `ddd4444`); hangisinin bozduğunu yine test söyler. |
 
 Blame ve `-S` "nerede" sorusunu bilen içindir; bisect "nerede" bilinmediğinde de çalışır.
 
@@ -147,7 +149,7 @@ HATALAR.md · **ARAÇ-01 "Dün çalışıyordu": hatayı getiren commit**
 
 ## English summary
 
-**Root cause:** `CampaignHistoryAsync` in `AdminService.cs` was changed from `OrderByDescending(CreatedAt).ThenByDescending(Id)` to `OrderBy(Id)`. Combined with `Take(n)` this returns the oldest n audit records instead of the newest, and in oldest-first order. The commit "Kampanya geçmişi sorgusu sadeleştirildi" (99bca3f) assumed the two sort keys were redundant and dropped the direction. Other commits on the branch (comments, a split ternary, a tie-break on the coupon list) are harmless.
+**Root cause:** `CampaignHistoryAsync` in `AdminService.cs` was changed from `OrderByDescending(CreatedAt).ThenByDescending(Id)` to `OrderBy(Id)`. Combined with `Take(n)` this returns the oldest n audit records instead of the newest, and in oldest-first order. The commit "Kampanya geçmişi sorgusu sadeleştirildi" (abc1234) assumed the two sort keys were redundant and dropped the direction. Other commits on the branch (comments, a split ternary, a tie-break on the coupon list) are harmless.
 
 **How to find it:** with a repeatable test (`kontrol 16`), use `git bisect`: `git bisect start`, `git bisect bad`, `git bisect good main`, restart the API and run the check at each step, answer good/bad; at most 4 steps for 12 commits. Automate with `git bisect run` and the helper scripts `bisect-kontrol.sh` / `bisect-kontrol.ps1` (copy them outside the repository first, because the working tree changes at each step). Alternatives: `git log -S`, `git log -L`, `git blame` when you already know where to look.
 

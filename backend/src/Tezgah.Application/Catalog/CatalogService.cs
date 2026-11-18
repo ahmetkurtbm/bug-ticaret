@@ -38,6 +38,8 @@ public class CatalogService(ITezgahDbContext db) : ICatalogService
         }
         if (!string.IsNullOrWhiteSpace(query.Brand))
             products = products.Where(p => p.Brand != null && p.Brand.Slug == query.Brand);
+        if (!string.IsNullOrWhiteSpace(query.Seller))
+            products = products.Where(p => p.Seller.Slug == query.Seller);
         if (!string.IsNullOrWhiteSpace(query.Q))
         {
             var term = query.Q.Trim().ToLowerInvariant();
@@ -81,6 +83,13 @@ public class CatalogService(ITezgahDbContext db) : ICatalogService
 
         return new PagedResult<ProductCardDto>(items, page, pageSize, total);
     }
+
+    public async Task<SellerPublicDto> GetSellerAsync(string slug, CancellationToken ct) =>
+        await db.Sellers.AsNoTracking()
+            .Where(s => s.Slug == slug && s.Status == SellerStatus.Active)
+            .Select(s => new SellerPublicDto(s.Slug, s.StoreName, s.Rating, s.RatingCount))
+            .SingleOrDefaultAsync(ct)
+        ?? throw new NotFoundException("Mağaza bulunamadı.");
 
     public async Task<ProductDetailDto> GetBySlugAsync(string slug, CancellationToken ct)
     {

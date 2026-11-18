@@ -49,8 +49,19 @@ docker compose --profile app up -d --build
 | http://localhost:5175 | Yönetim paneli |
 | http://localhost:8025 | Giden e-postalar |
 
-Hesaplar (şifre hepsinde `Tezgah123!`): `musteri@tezgah.test`, `satici@tezgah.test`,
-`admin@tezgah.test`.
+Hesaplar (şifre hepsinde `Tezgah123!`): `musteri@tezgah.test` → müşteri sitesi,
+`satici@tezgah.test` → satıcı paneli, `admin@tezgah.test` → yönetim paneli. Tarayıcı sekmesinin adı
+hangi sitede olduğunuzu söyler: **Tezgah**, **Tezgah Satıcı Paneli**, **Tezgah Yönetim**.
+
+Satıcı paneli yalnızca o mağazanın ürünlerinin siparişlerini gösterir; demo satıcının ürünleri için
+müşteri sitesinin ana sayfasındaki **Tezgah Demo Mağaza** çipine tıklayın.
+
+Geliştirici ekranları:
+
+| Adres | Ne |
+| --- | --- |
+| http://localhost:5080 | API'ye gelen son istekler: adres, durum kodu (200/401/500), süre, SQL sayısı, hata ayrıntısı |
+| http://localhost:5090 | Sahte bankanın paneli: son ödemeler ve ödeme bildirimlerinin durumu |
 
 Bir tur atın: müşteri olarak sipariş verin (ödeme sayfasında SMS kodu `123456`), e-postanın geldiğini
 görün, satıcı olarak siparişi kargoya verin, yönetici olarak siparişlere bakın. Sistem normalde nasıl
@@ -78,6 +89,9 @@ tekrar edeceğinizi anlatır. Cevabı söylemez. Kayıttaki adımları uygulayı
 Göremediğiniz hatayı düzelttiğinizden emin olamazsınız.
 
 ## 6. Hata ayıklayın: üç soru, üç araç
+
+> İpucu: API'nin "gelen istekler" ekranı (http://localhost:5080) hangi isteğin hangi kodla döndüğünü
+> tek bakışta gösterir; F12 → Network'ün sunucu tarafındaki karşılığıdır.
 
 Her hata için aynı sırayla ilerleyin:
 

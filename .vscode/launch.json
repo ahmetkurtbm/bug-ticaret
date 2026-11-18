@@ -1,6 +1,7 @@
+// Run and Debug (Ctrl+Shift+D) → "Tüm backend" → F5: API, Ödeme ve Bildirim servisleri hata ayıklayıcıyla,
+// her biri kendi terminalinde (loglar orada akar). Gerekli eklenti: C# Dev Kit.
+// Tarayıcı tarafı için "Müşteri sitesi (Chrome)" vb. (yalnızca kendi bilgisayarınızda).
 {
-  // F5 menüsünden "Tüm backend" seçilirse API, Ödeme ve Bildirim servisleri birlikte hata ayıklayıcıyla açılır.
-  // Gerekli eklenti: C# Dev Kit (ms-dotnettools.csdevkit). Tarayıcı tarafı için "Müşteri sitesi (Chrome)".
   "version": "0.2.0",
   "configurations": [
     {
@@ -10,7 +11,10 @@
       "preLaunchTask": "build: backend",
       "program": "${workspaceFolder}/backend/src/Tezgah.Api/bin/Debug/net10.0/Tezgah.Api.dll",
       "cwd": "${workspaceFolder}/backend/src/Tezgah.Api",
-      "env": { "ASPNETCORE_ENVIRONMENT": "Development", "ASPNETCORE_URLS": "http://localhost:5080" },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5080"
+      },
       "stopAtEntry": false,
       "console": "integratedTerminal"
     },
@@ -21,7 +25,10 @@
       "preLaunchTask": "build: backend",
       "program": "${workspaceFolder}/backend/src/Tezgah.Payments/bin/Debug/net10.0/Tezgah.Payments.dll",
       "cwd": "${workspaceFolder}/backend/src/Tezgah.Payments",
-      "env": { "ASPNETCORE_ENVIRONMENT": "Development", "ASPNETCORE_URLS": "http://localhost:5090" },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5090"
+      },
       "console": "integratedTerminal"
     },
     {
@@ -31,7 +38,10 @@
       "preLaunchTask": "build: backend",
       "program": "${workspaceFolder}/backend/src/Tezgah.Notifications/bin/Debug/net10.0/Tezgah.Notifications.dll",
       "cwd": "${workspaceFolder}/backend/src/Tezgah.Notifications",
-      "env": { "ASPNETCORE_ENVIRONMENT": "Development", "ASPNETCORE_URLS": "http://localhost:5095" },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5095"
+      },
       "console": "integratedTerminal"
     },
     {
@@ -40,7 +50,11 @@
       "request": "launch",
       "preLaunchTask": "build: backend",
       "program": "${workspaceFolder}/backend/tools/Tezgah.DataGen/bin/Debug/net10.0/Tezgah.DataGen.dll",
-      "args": ["--profile", "small", "--reset"],
+      "args": [
+        "--profile",
+        "small",
+        "--reset"
+      ],
       "cwd": "${workspaceFolder}/backend/tools/Tezgah.DataGen",
       "console": "integratedTerminal"
     },
@@ -64,13 +78,68 @@
       "request": "launch",
       "url": "http://localhost:5175",
       "webRoot": "${workspaceFolder}/frontend/apps/admin"
+    },
+    {
+      "name": "API (monolit) · birlikte",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/src/Tezgah.Api/bin/Debug/net10.0/Tezgah.Api.dll",
+      "cwd": "${workspaceFolder}/backend/src/Tezgah.Api",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5080"
+      },
+      "stopAtEntry": false,
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": true
+      }
+    },
+    {
+      "name": "Ödeme servisi · birlikte",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/src/Tezgah.Payments/bin/Debug/net10.0/Tezgah.Payments.dll",
+      "cwd": "${workspaceFolder}/backend/src/Tezgah.Payments",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5090"
+      },
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": true
+      }
+    },
+    {
+      "name": "Bildirim servisi · birlikte",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/src/Tezgah.Notifications/bin/Debug/net10.0/Tezgah.Notifications.dll",
+      "cwd": "${workspaceFolder}/backend/src/Tezgah.Notifications",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5095"
+      },
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": true
+      }
     }
   ],
   "compounds": [
     {
       "name": "Tüm backend",
-      "configurations": ["API (monolit)", "Ödeme servisi", "Bildirim servisi"],
-      "stopAll": true
+      "configurations": [
+        "API (monolit) · birlikte",
+        "Ödeme servisi · birlikte",
+        "Bildirim servisi · birlikte"
+      ],
+      "preLaunchTask": "build: backend",
+      "stopAll": true,
+      "presentation": {
+        "group": "0-backend",
+        "order": 1
+      }
     }
   ]
 }

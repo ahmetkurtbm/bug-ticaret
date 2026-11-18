@@ -2,6 +2,7 @@
 # Codespace ilk oluşturulurken bir kez çalışır (postCreateCommand).
 set -euo pipefail
 cd "$(dirname "$0")/.."
+source .devcontainer/ortak.sh
 
 echo "▶ Adresler ayarlanıyor"
 if [ -n "${CODESPACE_NAME:-}" ]; then
@@ -17,15 +18,21 @@ PUBLIC_SELLER_URL=$(url 5174)
 PUBLIC_ADMIN_URL=$(url 5175)
 EOF
   cat .env
-else
-  echo "  Codespaces dışında çalışıyor; yerel adresler (localhost) kullanılacak."
 fi
 
 echo "▶ .NET araçları ve frontend bağımlılıkları kuruluyor"
-(cd backend && dotnet tool restore >/dev/null)
+(cd backend && dotnet tool restore >/dev/null && dotnet build Tezgah.slnx -v q >/dev/null)
 (cd frontend && npm ci --no-audit --no-fund >/dev/null)
 
-echo "▶ Sistem derleniyor ve örnek veri üretiliyor (ilk seferde birkaç dakika sürer)"
-docker compose --profile app up -d --build
+docker_bekle
 
-echo "✔ Hazır. Rehber: docs/CODESPACES.md"
+echo "▶ Sistem derleniyor, veritabanı kuruluyor, örnek veri üretiliyor (birkaç dakika)"
+docker compose --profile app up -d --build
+for _ in $(seq 1 120); do
+  docker compose logs seed 2>/dev/null | grep -q "Bitti\|zaten veri" && break
+  sleep 5
+done
+
+# Backend servisleri VS Code'dan (F5) hata ayıklayıcıyla çalışır; Docker'dakiler kapatılır.
+docker compose stop api payments notifications >/dev/null 2>&1 || true
+echo "✔ Hazır. Backend'i başlatmak için F5 (Tüm backend). Rehber: docs/CODESPACES.md"

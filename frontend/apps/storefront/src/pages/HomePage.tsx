@@ -4,6 +4,9 @@ import { catalogApi } from '../api/catalog'
 import { ErrorState } from '../components/ErrorState'
 import { ProductGrid, ProductGridSkeleton } from '../components/ProductGrid'
 
+// Örnek veride id=1 olan demo satıcının (DataGen) slug'ı.
+const DEMO_SELLER_SLUG = 'tezgah-demo-magaza'
+
 export function HomePage() {
   const popular = useQuery({
     queryKey: ['products', { sort: 'popular', pageSize: 20 }],
@@ -25,6 +28,14 @@ export function HomePage() {
         <section aria-labelledby="cat-title">
           <h2 id="cat-title" className="mb-3 text-lg font-bold">Kategoriler</h2>
           <ul className="flex flex-wrap gap-2">
+            <li>
+              <Link to={`/magaza/${DEMO_SELLER_SLUG}`} className="flex items-center gap-1.5 rounded-full border-2 border-brand-600 bg-brand-50 px-4 py-1.5 text-sm font-semibold text-brand-800 hover:bg-brand-100">
+                <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l1.5-5h15L21 9M3 9v11h18V9M3 9a3 3 0 006 0 3 3 0 006 0 3 3 0 006 0M9 20v-6h6v6" />
+                </svg>
+                Tezgah Demo Mağaza
+              </Link>
+            </li>
             {categories.data.flatMap((root) => root.children.length ? root.children : [root]).slice(0, 18).map((c) => (
               <li key={c.id}>
                 <Link to={`/kategori/${c.slug}`} className="block rounded-full border border-line bg-white px-4 py-2 text-sm hover:border-brand-600 hover:text-brand-700">

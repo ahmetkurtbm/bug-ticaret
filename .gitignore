@@ -24,3 +24,6 @@ CLAUDE.md
 
 # Ortama özel adresler (Codespaces'te .devcontainer/hazirla.sh yazar)
 .env
+
+# Bölüm aracının ilerleme kaydı (yalnızca sizin bilgisayarınızda)
+.bolum/

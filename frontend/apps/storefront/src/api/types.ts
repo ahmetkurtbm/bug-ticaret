@@ -33,12 +33,20 @@ export type ProductSort = 'popular' | 'price_asc' | 'price_desc' | 'newest' | 'r
 export interface ProductSearchParams {
   category?: string
   brand?: string
+  seller?: string
   q?: string
   minPrice?: number
   maxPrice?: number
   sort?: ProductSort
   page?: number
   pageSize?: number
+}
+
+export interface SellerPublic {
+  slug: string
+  storeName: string
+  rating: number
+  ratingCount: number
 }
 
 export interface Variant {

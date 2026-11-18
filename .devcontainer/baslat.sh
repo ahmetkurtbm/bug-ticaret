@@ -1,19 +1,12 @@
 #!/usr/bin/env bash
-# Codespace her açıldığında çalışır (postStartCommand): durdurulup yeniden açılınca sistem de açılır.
+# Codespace her açıldığında çalışır (postStartCommand): durdurulup yeniden açılınca da.
 set -uo pipefail
 cd "$(dirname "$0")/.."
+source .devcontainer/ortak.sh
 
-docker compose --profile app up -d >/dev/null 2>&1 || true
+docker_bekle || exit 0
+docker compose --profile app up -d $DOCKER_SERVISLERI >/dev/null 2>&1
 
-# Siteler API'ye ve ödeme sayfasına tarayıcıdan, ayrı adreslerden ulaşır. Codespaces portları varsayılan
-# olarak gizlidir (GitHub girişi ister) ve sitenin arka plan istekleri bu girişi taşıyamaz; bu yüzden
-# API ve ödeme portları herkese açık yapılır. İçerik yalnızca kurgusal örnek veridir.
-if [ -n "${CODESPACE_NAME:-}" ] && command -v gh >/dev/null 2>&1; then
-  for _ in $(seq 1 30); do
-    if gh codespace ports visibility 5080:public 5090:public -c "$CODESPACE_NAME" >/dev/null 2>&1; then
-      echo "✔ API ve ödeme portları açık"
-      break
-    fi
-    sleep 5
-  done
-fi
+# API ve ödeme portlarını herkese açık yap (siteler onlara tarayıcıdan, ayrı adreslerden ulaşır).
+# Servisler F5'ten sonra açılır; o zamana kadar arka planda tekrar denenir.
+nohup bash .devcontainer/portlari-ac.sh >/tmp/portlari-ac.log 2>&1 &

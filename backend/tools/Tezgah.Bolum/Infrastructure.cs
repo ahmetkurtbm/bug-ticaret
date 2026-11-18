@@ -125,3 +125,33 @@ public static class Output
         Console.WriteLine(text);
     }
 }
+
+/// <summary>Çözülen bölümler. Depo kökünde .bolum/ilerleme.json (git'e girmez, yalnızca sizin bilgisayarınızda).</summary>
+public static class Progress
+{
+    private static string PathFor(Repository repo) => System.IO.Path.Combine(repo.Root, ".bolum", "ilerleme.json");
+
+    public static Dictionary<int, DateTimeOffset> Load(Repository repo)
+    {
+        try
+        {
+            var path = PathFor(repo);
+            return File.Exists(path)
+                ? JsonSerializer.Deserialize<Dictionary<int, DateTimeOffset>>(File.ReadAllText(path)) ?? []
+                : [];
+        }
+        catch (Exception ex) when (ex is IOException or JsonException)
+        {
+            return [];
+        }
+    }
+
+    public static void MarkSolved(Repository repo, int chapterNo)
+    {
+        var all = Load(repo);
+        all.TryAdd(chapterNo, DateTimeOffset.Now);
+        var path = PathFor(repo);
+        Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path)!);
+        File.WriteAllText(path, JsonSerializer.Serialize(all, new JsonSerializerOptions { WriteIndented = true }));
+    }
+}

@@ -23,6 +23,17 @@ gerekir; ücretsiz hesapların aylık kotası birçok bölümü çözmeye yeter.
 
 **Kendi bilgisayarınızda:** [Başlarken](docs/BASLARKEN.md) sayfası sizi sıfırdan ilk bölüme kadar adım adım götürür.
 
+### 10 dakikada ilk hatanız
+
+1. Yukarıdaki düğmeyle Codespace açın, kurulumun bitmesini bekleyin (`✔ Hazır`).
+2. **Run and Debug → Tüm backend → F5.**
+3. Terminalde: `dotnet run --project backend/tools/Tezgah.Bolum -- baslat 8`, ardından **Ctrl+Shift+F5**.
+4. `bolumler/08-eski-siparisler/KAYIT.md`'yi okuyun; kayıttaki müşteriyle müşteri sitesine girin, hatayı görün.
+5. Hatanın yerini bulun: alttaki API terminalinde akan hata satırı → dosya ve satır → durdurma noktası.
+6. Düzeltin, Ctrl+Shift+F5, ve `dotnet run --project backend/tools/Tezgah.Bolum -- kontrol`.
+
+Takılırsanız: `... -- ipucu 8`. Kolay başlangıç bölümleri: **8**, **10**, **2**.
+
 ## İçindekiler
 
 | Bölüm | Açıklama |

@@ -32,6 +32,15 @@
   // Her açılışta (durdurulup yeniden başlatılınca da): sistemi ayağa kaldır.
   "postStartCommand": "bash .devcontainer/baslat.sh",
 
+  // VS Code'dan (F5) başlatılan backend servisleri tarayıcının kullandığı Codespace adreslerini bilsin.
+  "remoteEnv": {
+    "Cors__AllowedOrigins__3": "https://${containerEnv:CODESPACE_NAME}-5173.${containerEnv:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}",
+    "Cors__AllowedOrigins__4": "https://${containerEnv:CODESPACE_NAME}-5174.${containerEnv:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}",
+    "Cors__AllowedOrigins__5": "https://${containerEnv:CODESPACE_NAME}-5175.${containerEnv:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}",
+    "Orders__StorefrontBaseUrl": "https://${containerEnv:CODESPACE_NAME}-5173.${containerEnv:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}",
+    "Payments__PublicBaseUrl": "https://${containerEnv:CODESPACE_NAME}-5090.${containerEnv:GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+  },
+
   "customizations": {
     "codespaces": {
       "openFiles": ["docs/CODESPACES.md"]

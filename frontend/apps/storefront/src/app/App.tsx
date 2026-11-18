@@ -36,6 +36,7 @@ export function App() {
             <Route element={<Layout />}>
               <Route index element={<HomePage />} />
               <Route path="kategori/:slug" element={<ProductListPage />} />
+              <Route path="magaza/:slug" element={<ProductListPage />} />
               <Route path="ara" element={<ProductListPage />} />
               <Route path="urun/:slug" element={<ProductPage />} />
               <Route path="sepet" element={<CartPage />} />

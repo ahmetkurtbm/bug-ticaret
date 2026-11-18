@@ -1,0 +1,59 @@
+name: Bölüm doğrulama
+
+# Her bölüm için: main'de kontrol geçmeli, bölüm dalında hatayı yakalamalı.
+# Elle çalıştırmak için: Actions → Bölüm doğrulama → Run workflow.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths-ignore: ["**/*.md"]
+
+concurrency:
+  group: bolumler
+  cancel-in-progress: true
+
+jobs:
+  bolum:
+    name: Bölüm ${{ matrix.no }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { no: 1, dal: 01-docker-odeme }
+          - { no: 2, dal: 02-urun-sayfasi }
+          - { no: 3, dal: 03-sayfa-yenileme }
+          - { no: 4, dal: 04-satici-basvurusu }
+          - { no: 5, dal: 05-askidaki-satici }
+          - { no: 6, dal: 06-satici-paneli-bos }
+          - { no: 7, dal: 07-bildirim-guvenligi }
+          - { no: 8, dal: 08-eski-siparisler }
+          - { no: 9, dal: 09-kategori-sayfasi }
+          - { no: 10, dal: 10-kupon-kodu }
+          - { no: 11, dal: 11-sepet-adedi }
+          - { no: 12, dal: 12-urun-fiyati }
+          - { no: 13, dal: 13-giris-yapilamiyor }
+          - { no: 14, dal: 14-kampanya-saati }
+          - { no: 15, dal: 15-yonetim-siparisleri }
+          - { no: 16, dal: 16-kampanya-gecmisi }
+          - { no: 17, dal: 17-siparislerim-yavas }
+          - { no: 18, dal: 18-son-urun }
+          - { no: 19, dal: 19-stok-dusumu }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: main — kontrol geçmeli
+        run: bash .github/scripts/bolum-dogrula.sh ${{ matrix.no }} gecer
+      - name: bolum/${{ matrix.dal }} — kontrol hatayı yakalamalı
+        run: |
+          cp .github/scripts/bolum-dogrula.sh "$RUNNER_TEMP/dogrula.sh"
+          git checkout -q -B "bolum/${{ matrix.dal }}" "origin/bolum/${{ matrix.dal }}"
+          bash "$RUNNER_TEMP/dogrula.sh" ${{ matrix.no }} kalir

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Tezgah.Payments;
+using Tezgah.Payments.Checkout;
 using Tezgah.Payments.Controllers;
 using Tezgah.Payments.Persistence;
 using Tezgah.Payments.Webhooks;
@@ -49,6 +50,31 @@ if (app.Environment.IsDevelopment())
 app.UseRouting();
 app.MapHealthChecks("/health");
 app.MapControllers();
+
+// "Son ödemeler" paneli (sahte banka). API anahtarı gerekmez; müşteri e-postası seçilmez.
+app.MapGet("/", async (PaymentsDbContext db, CancellationToken ct) =>
+{
+    var payments = await db.Payments.AsNoTracking()
+        .OrderByDescending(p => p.CreatedAt)
+        .Take(50)
+        .Select(p => new { p.Id, p.CreatedAt, p.OrderNumber, p.Amount, p.InstallmentCount, p.Status, p.FailureReason })
+        .ToListAsync(ct);
+
+    var ids = payments.Select(p => p.Id).ToList();
+    var deliveries = await db.WebhookDeliveries.AsNoTracking()
+        .Where(d => ids.Contains(d.PaymentId))
+        .Select(d => new { d.PaymentId, d.CreatedAt, Info = new PanelDelivery(d.DeliveredAt, d.AttemptCount, d.LastError) })
+        .ToListAsync(ct);
+    var latest = deliveries
+        .GroupBy(d => d.PaymentId)
+        .ToDictionary(g => g.Key, g => g.OrderByDescending(d => d.CreatedAt).First().Info);
+
+    var rows = payments
+        .Select(p => new PanelRow(p.Id, p.CreatedAt, p.OrderNumber, p.Amount, p.InstallmentCount, p.Status,
+            p.FailureReason, latest.GetValueOrDefault(p.Id)))
+        .ToList();
+    return Results.Content(PaymentsPanelPage.Render(rows), "text/html; charset=utf-8");
+});
 
 app.Run();
 

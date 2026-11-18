@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Link, useParams, useSearchParams } from 'react-router'
+import { Link, useMatch, useParams, useSearchParams } from 'react-router'
 import { catalogApi } from '../api/catalog'
 import type { CategoryNode, ProductSort } from '../api/types'
 import { ErrorState } from '../components/ErrorState'
@@ -23,9 +23,12 @@ function findCategory(nodes: CategoryNode[] | undefined, slug: string | undefine
   return undefined
 }
 
-/** Kategori sayfası (/kategori/:slug) ve arama sonuçları (/ara?q=) aynı bileşeni kullanır. */
+/** Kategori (/kategori/:slug), mağaza (/magaza/:slug) ve arama (/ara?q=) sayfaları aynı bileşeni kullanır. */
 export function ProductListPage() {
-  const { slug } = useParams()
+  const { slug: routeSlug } = useParams()
+  const isSellerPage = useMatch('/magaza/:slug') !== null
+  const slug = isSellerPage ? undefined : routeSlug
+  const sellerSlug = isSellerPage ? routeSlug : undefined
   const [params, setParams] = useSearchParams()
 
   const q = params.get('q') ?? undefined
@@ -36,8 +39,14 @@ export function ProductListPage() {
 
   const categories = useQuery({ queryKey: ['categories'], queryFn: ({ signal }) => catalogApi.categories(signal), staleTime: 10 * 60_000 })
   const category = findCategory(categories.data, slug)
+  const seller = useQuery({
+    queryKey: ['seller', sellerSlug],
+    queryFn: ({ signal }) => catalogApi.seller(sellerSlug!, signal),
+    enabled: sellerSlug !== undefined,
+    staleTime: 10 * 60_000,
+  })
 
-  const search = { category: slug, q, sort, page, minPrice, maxPrice, pageSize: 24 }
+  const search = { category: slug, seller: sellerSlug, q, sort, page, minPrice, maxPrice, pageSize: 24 }
   const products = useQuery({
     queryKey: ['products', search],
     queryFn: ({ signal }) => catalogApi.search(search, signal),
@@ -55,7 +64,7 @@ export function ProductListPage() {
     window.scrollTo({ top: 0 })
   }
 
-  const title = q ? `"${q}" için sonuçlar` : (category?.name ?? 'Ürünler')
+  const title = q ? `"${q}" için sonuçlar` : (seller.data?.storeName ?? category?.name ?? 'Ürünler')
 
   return (
     <div className="grid gap-6 lg:grid-cols-[14rem_1fr]">

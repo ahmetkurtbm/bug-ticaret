@@ -59,6 +59,8 @@ builder.Services.AddCors(options => options.AddPolicy("web", policy => policy
     .WithExposedHeaders("Server-Timing")));
 
 builder.Services.AddHealthChecks();
+if (builder.Environment.IsDevelopment())
+    builder.Services.AddSingleton<RequestLogStore>();
 builder.Services.AddHostedService<ExpireUnpaidOrdersJob>();
 builder.Services.AddHostedService<OutboxPublisherJob>();
 
@@ -90,6 +92,8 @@ if (app.Environment.IsDevelopment())
         });
         await next();
     });
+    // Gelen istekler ekranı için kayıt (UseExceptionHandler'dan sonra: istisnayı görür, yeniden fırlatır).
+    app.UseMiddleware<RequestLogMiddleware>();
 }
 
 app.UseRouting();
@@ -99,6 +103,13 @@ app.UseAuthorization();
 
 app.MapHealthChecks("/health");
 app.MapControllers();
+
+if (app.Environment.IsDevelopment())
+{
+    // Geliştirme aracı: son istekler. Aynı kaynaktan açıldığı için CORS gerekmez.
+    app.MapGet("/", () => Results.Content(RequestLogPage.Html, "text/html; charset=utf-8"));
+    app.MapGet("/_istekler", (RequestLogStore store) => Results.Json(store.Snapshot()));
+}
 
 app.Run();
 
