@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # API (5080) ve Ödeme (5090) portları dinlemeye başlayınca onları "public" yapar. 30 dakika dener.
-[ -n "${CODESPACE_NAME:-}" ] && command -v gh >/dev/null 2>&1 || exit 0
+cd "$(dirname "$0")/.."
+source .devcontainer/ortak.sh
+codespace_ortami
+[ -n "${CODESPACE_NAME:-}" ] && command -v gh >/dev/null 2>&1 || { echo "Codespace bilgisi yok"; exit 0; }
+echo "Portlar bekleniyor: $CODESPACE_NAME"
 for _ in $(seq 1 180); do
   ok=1
   for p in 5080 5090; do

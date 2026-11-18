@@ -9,4 +9,5 @@ docker compose --profile app up -d $DOCKER_SERVISLERI >/dev/null 2>&1
 
 # API ve ödeme portlarını herkese açık yap (siteler onlara tarayıcıdan, ayrı adreslerden ulaşır).
 # Servisler F5'ten sonra açılır; o zamana kadar arka planda tekrar denenir.
-nohup bash .devcontainer/portlari-ac.sh >/tmp/portlari-ac.log 2>&1 &
+# setsid: açılış komutu bitince Codespaces onun alt süreçlerini kapatır; bu iş bağımsız yaşamalı.
+setsid nohup bash .devcontainer/portlari-ac.sh >/tmp/portlari-ac.log 2>&1 < /dev/null &

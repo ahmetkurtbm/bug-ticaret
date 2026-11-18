@@ -3,6 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 source .devcontainer/ortak.sh
+codespace_ortami
 
 echo "▶ Adresler ayarlanıyor"
 if [ -n "${CODESPACE_NAME:-}" ]; then
