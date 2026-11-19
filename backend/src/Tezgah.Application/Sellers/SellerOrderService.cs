@@ -138,7 +138,8 @@ public class SellerOrderService(ITezgahDbContext db, SellerContext seller, ICurr
             .Select(d => daily.TryGetValue(d, out var p) ? p : new DailySalesPoint(d, 0, 0)).ToList();
 
         var gross = sales.Sum(s => s.LineTotal);
-        var commission = sales.Sum(s => Pricing.Money.Round(s.LineTotal * s.CommissionRate / 100m));
+        // Toplam bir kez yuvarlanır; satır satır yuvarlamaya gerek yok.
+        var commission = (decimal)Math.Round(sales.Sum(s => (double)s.LineTotal * (double)s.CommissionRate / 100), 2);
         return new SellerDashboardDto(
             toShip, lowStock,
             productCounts.FirstOrDefault(c => c.Key == ProductStatus.Active)?.Count ?? 0,
