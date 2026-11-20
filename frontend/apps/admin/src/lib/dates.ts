@@ -26,6 +26,15 @@ export function addDays(day: string, amount: number) {
   return new Date(Date.parse(`${day}T00:00:00Z`) + amount * DAY_MS).toISOString().slice(0, 10)
 }
 
+/**
+ * Form alanındaki günü API'nin beklediği "YYYY-MM-DD" biçimine çevirir. Tarih seçicisi olmayan
+ * tarayıcılarda elle yazılan "01.12.2026" biçimi de kabul edilir.
+ */
+export function toApiDay(value: string) {
+  const [year, month, day] = value.includes('.') ? value.split('.').reverse().map(Number) : value.split('-').map(Number)
+  return new Date(year, month - 1, day).toISOString().slice(0, 10)
+}
+
 export const startOfMonth = (day: string) => `${day.slice(0, 8)}01`
 
 /** İki gün arasındaki fark (to - from). */

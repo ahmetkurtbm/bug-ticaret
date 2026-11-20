@@ -7,7 +7,7 @@ import { ErrorState, InlineError, LoadingBlock } from '../components/ErrorState'
 import { Field, SelectField } from '../components/Field'
 import { MetaBadge } from '../components/StatusBadge'
 import { rowClass, RowTh, TableShell, tdClass, Th } from '../components/Table'
-import { addDays, formatDateTime, formatDay, formatInclusiveEndDay, todayInIstanbul } from '../lib/dates'
+import { addDays, formatDateTime, formatDay, formatInclusiveEndDay, toApiDay, todayInIstanbul } from '../lib/dates'
 import { formatPrice } from '../lib/format'
 import { campaignActionLabel, couponStateMeta, couponTypeLabel } from '../lib/statuses'
 
@@ -142,8 +142,8 @@ function CouponForm({ onClose, onCreated }: { onClose: () => void; onCreated: ()
       maxUses: optionalNumber(data, 'maxUses'),
       maxUsesPerUser: optionalNumber(data, 'maxUsesPerUser'),
       sellerId: optionalNumber(data, 'sellerId'),
-      startsOn: String(data.get('startsOn') ?? ''),
-      endsOn: String(data.get('endsOn') ?? ''),
+      startsOn: toApiDay(String(data.get('startsOn') ?? '')),
+      endsOn: toApiDay(String(data.get('endsOn') ?? '')),
     })
   }
 
