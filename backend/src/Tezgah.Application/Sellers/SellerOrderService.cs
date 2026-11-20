@@ -91,7 +91,7 @@ public class SellerOrderService(ITezgahDbContext db, SellerContext seller, ICurr
             .SingleAsync(ct);
         var shippedEvent = new OrderShippedEvent(Guid.CreateVersion7(), order.Id, order.OrderNumber, info.Email, info.Name, info.Store,
             request.Carrier, request.TrackingNumber, now);
-        Outbox.Add(db, shippedEvent.EventId, EventTopology.OrderShipped, shippedEvent, now);
+        Outbox.Add(db, shippedEvent.EventId, EventTopology.ShipmentCreated, shippedEvent, now);
 
         // Satılan adet ürünün satış sayısına eklenir (vitrinde "çok satanlar" sıralaması).
         foreach (var group in order.Items.Where(i => i.SellerId == sellerId).GroupBy(i => i.VariantId))

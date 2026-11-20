@@ -6,6 +6,8 @@ public static class EventTopology
     public const string Exchange = "tezgah.events";
     public const string OrderPaid = "order.paid";
     public const string OrderShipped = "order.shipped";
+    /// <summary>Satıcı kendi kalemlerini kargoya verdi. Çok satıcılı siparişte her satıcı için ayrı yayınlanır.</summary>
+    public const string ShipmentCreated = "order.shipment-created";
     public const string SellerApproved = "seller.approved";
 }
 
