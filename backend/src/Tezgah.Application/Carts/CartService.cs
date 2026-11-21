@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Tezgah.Application.Campaigns;
 using Tezgah.Application.Common.Exceptions;
 using Tezgah.Application.Common.Interfaces;
@@ -10,7 +11,7 @@ using Tezgah.Domain.Common;
 
 namespace Tezgah.Application.Carts;
 
-public class CartService(ITezgahDbContext db, CouponValidator coupons, TimeProvider clock) : ICartService
+public class CartService(ITezgahDbContext db, CouponValidator coupons, TimeProvider clock, ILogger<CartService> logger) : ICartService
 {
     private const int MaxQuantityPerLine = 20;
 
@@ -74,7 +75,17 @@ public class CartService(ITezgahDbContext db, CouponValidator coupons, TimeProvi
     public async Task<CartDto> ApplyCouponAsync(CartOwner owner, string couponCode, CancellationToken ct)
     {
         var cart = await FindAsync(owner, ct) ?? throw new DomainException("cart_empty", "Sepetiniz boş.");
-        var coupon = await coupons.ValidateAsync(couponCode, owner.UserId, ct);
+        Coupon coupon;
+        try
+        {
+            coupon = await coupons.ValidateAsync(couponCode, owner.UserId, ct);
+        }
+        catch (Exception ex)
+        {
+            // Sebep loga yazılır; müşteriye tek mesaj döner (geçerli kodları tahmin etmeyi zorlaştırmak için).
+            logger.LogWarning(ex, "Kupon uygulanamadı: {CouponCode}", couponCode);
+            throw new DomainException("coupon_rejected", "Kupon uygulanamadı.");
+        }
 
         cart.CouponCode = coupon.Code;
         cart.UpdatedAt = clock.GetUtcNow();
