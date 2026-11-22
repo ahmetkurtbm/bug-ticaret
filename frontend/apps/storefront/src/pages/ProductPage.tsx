@@ -175,8 +175,8 @@ function ProductView({ product }: { product: ProductDetail }) {
       {product.description && (
         <section aria-labelledby="desc-title" className="rounded-xl border border-line bg-white p-6">
           <h2 id="desc-title" className="mb-3 text-lg font-bold">Ürün açıklaması</h2>
-          {/* Açıklama düz metin olarak gösterilir; satıcı HTML'i sunucuda temizlenene kadar HTML olarak basılmaz. */}
-          <p className="whitespace-pre-line text-sm leading-relaxed text-muted">{product.description.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}</p>
+          {/* Satıcılar açıklamada kalın yazı ve liste kullanıyor; biçim korunur. */}
+          <div className="text-sm leading-relaxed text-muted [&_li]:ml-5 [&_ul]:list-disc" dangerouslySetInnerHTML={{ __html: product.description }} />
         </section>
       )}
     </article>
