@@ -8,15 +8,26 @@ namespace Tezgah.Infrastructure.Reporting;
 /// Eski raporlama modülü (legacy). Bağlantıyı kendisi açar, SQL'i elle yazar.
 /// Tüm gün hesapları İstanbul saatine göre: "1 Kasım satışları" İstanbul'da 1 Kasım 00:00 ile 2 Kasım 00:00 arası.
 /// </summary>
-public class DapperReportingQueries(NpgsqlDataSource dataSource) : IReportingQueries
+public class DapperReportingQueries(NpgsqlDataSource dataSource) : IReportingQueries, IAsyncDisposable
 {
+    // Rapor birkaç sorguyu art arda çalıştırıyor; bağlantı her seferinde açılmaz, bir kez açılıp tutulur.
+    private NpgsqlConnection? _connection;
+
+    private async Task<NpgsqlConnection> ConnectionAsync(CancellationToken ct) =>
+        _connection ??= await dataSource.OpenConnectionAsync(ct);
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_connection is not null) await _connection.DisposeAsync();
+    }
+
     private const string Tz = "Europe/Istanbul";
     // Ödemesi alınmış, iptal ya da iade edilmemiş siparişler: 2=Paid ... 5=Delivered.
     private const string SoldStatuses = "(2,3,4,5)";
 
     public async Task<SalesReport> GetSalesReportAsync(DateOnly from, DateOnly to, CancellationToken ct)
     {
-        await using var conn = await dataSource.OpenConnectionAsync(ct);
+        var conn = await ConnectionAsync(ct);
         var args = new { from = from.ToDateTime(TimeOnly.MinValue), toExclusive = to.AddDays(1).ToDateTime(TimeOnly.MinValue), tz = Tz };
 
         // Aralık sınırları yerel gün başlarıdır; (yerel zaman AT TIME ZONE tz) UTC anını verir, index kullanılabilir.

@@ -31,7 +31,8 @@ public static class DependencyInjection
         // Eski raporlama modülü EF'yi kullanmaz; kendi bağlantı havuzuyla Dapper çalıştırır.
         Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
         services.AddSingleton(_ => new Npgsql.NpgsqlDataSourceBuilder(connectionString).Build());
-        services.AddScoped<Tezgah.Application.Reporting.IReportingQueries, Tezgah.Infrastructure.Reporting.DapperReportingQueries>();
+        // Tek örnek: rapor bağlantısı istekler arasında yeniden kullanılır.
+        services.AddSingleton<Tezgah.Application.Reporting.IReportingQueries, Tezgah.Infrastructure.Reporting.DapperReportingQueries>();
 
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
