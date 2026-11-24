@@ -119,7 +119,9 @@ public partial class DataGenerator
                 _ => SellerStatus.Closed,
             };
             var created = RandomPast(1500, 200);
-            var commission = (decimal)Pick(new[] { 8.0, 10.0, 12.5, 15.0, 18.0 });
+            var pickedCommission = (decimal)Pick(new[] { 8.0, 10.0, 12.5, 15.0, 18.0 });
+            // Demo mağaza pazar yerinin standart oranında; diğer mağazaların verisi aynı kalsın diye seçim yine yapılır.
+            var commission = i == 0 ? 12.5m : pickedCommission;
             var city = PickCity();
 
             await sellers.RowAsync(id, owners[i], name, slug, $"{name} Tic. Ltd. Şti.", (1_000_000_000L + id * 7919).ToString(),

@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 15 (EF-01)
+# İpuçları · Bölüm 15
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 

@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 11 (FE-03)
+# İpuçları · Bölüm 11
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 

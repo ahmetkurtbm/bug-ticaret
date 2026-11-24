@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 17 (DB-01)
+# İpuçları · Bölüm 17
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 

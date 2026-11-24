@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 14 (NET-11)
+# İpuçları · Bölüm 14
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 

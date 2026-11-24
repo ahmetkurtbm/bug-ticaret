@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 18 (EŞ-01)
+# İpuçları · Bölüm 18
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 

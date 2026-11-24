@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 12 (FE-14)
+# İpuçları · Bölüm 12
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 

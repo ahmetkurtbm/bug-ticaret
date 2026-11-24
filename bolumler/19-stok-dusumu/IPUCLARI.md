@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 19 (EŞ-02)
+# İpuçları · Bölüm 19
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 

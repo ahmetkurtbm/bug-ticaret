@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 4 (API-01)
+# İpuçları · Bölüm 4
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 

@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 16 (ARAÇ-01)
+# İpuçları · Bölüm 16
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 

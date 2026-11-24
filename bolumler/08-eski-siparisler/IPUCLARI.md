@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 8 (NET-03)
+# İpuçları · Bölüm 8
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 

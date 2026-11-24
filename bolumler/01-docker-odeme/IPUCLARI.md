@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 1 (ORT-01)
+# İpuçları · Bölüm 1
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 

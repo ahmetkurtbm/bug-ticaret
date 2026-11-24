@@ -166,11 +166,11 @@ Hedef: ilk sürümde 15-20 bölüm, sonra 50+.
 - [x] **Pazar yeri:** satıcı başvurusu ve paneli (ürün, varyant, stok, kargolama, özet), yönetim paneli
       (satıcı ve ürün onayı, siparişler, kampanyalar, satış raporu), komisyon.
 - [x] **Yan sistemler:** outbox + RabbitMQ, Bildirim servisi (Mailpit), Dapper ile eski rapor modülü, Nginx.
-- [x] **Bölümler:** 19 hata dalı, bölüm aracı (`backend/tools/Tezgah.Bolum`), kontroller, kayıt/ipucu/çözüm.
+- [x] **Bölümler:** 25 hata dalı, bölüm aracı (`backend/tools/Tezgah.Bolum`), kontroller, kayıt/ipucu/çözüm.
 - [x] **Dokümantasyon:** README, kurulum, mimari, IDE (Visual Studio + VS Code).
 
 Sırada: kargo durumu simülasyonu ve iade, hakediş ekranı, Katalog servisinin ayrılması (strangler fig),
-gözlemlenebilirlik (OpenTelemetry), Redis önbellek, ikinci bölüm grubu, mobil uygulama, videolar.
+gözlemlenebilirlik (OpenTelemetry), Redis önbellek, sonraki bölümler, mobil uygulama, videolar.
 
 ## Aşamalar (taslak)
 
@@ -197,6 +197,9 @@ Seçim ölçütü: her seviyeden örnek, en sık karşılaşılanlar önce, ve i
 kurulabilmesi. Katalogdan seçilen 19 hata türü (kod sırasıyla): API-01, API-02, API-03, ARAÇ-01,
 DB-01, EF-01, EŞ-01, EŞ-02, FE-01, FE-02, FE-03, FE-12, FE-14, NET-01, NET-02, NET-03, NET-09,
 NET-11, ORT-01.
+
+İkinci grup (2026-11-24, bölüm 20-25): GÜV-04, FE-16, API-11, FE-10, DB-07, NET-17. Seçim ölçütü:
+ilk grupta olmayan alanlar (güvenlik, raporlama, para hesabı) ve günlük işte en sık görülenler.
 
 Bölüm numarası ile hata türü eşleşmesi öğrenciye ipucu vermemek için hiçbir öğrenci belgesinde
 yazılmaz; yalnızca her bölümün COZUM.md dosyasında ve bakım betiğinde bulunur.

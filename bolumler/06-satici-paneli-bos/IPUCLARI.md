@@ -1,4 +1,4 @@
-# İpuçları · Bölüm 6 (NET-01)
+# İpuçları · Bölüm 6
 
 Üç ipucu var, ağırlığı giderek artar. Önce kendiniz deneyin; takılınca sırayla açın.
 
