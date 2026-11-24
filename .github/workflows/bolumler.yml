@@ -46,6 +46,13 @@ jobs:
           - { no: 23, dal: 23-cift-siparis }
           - { no: 24, dal: 24-rapor-cirosu }
           - { no: 25, dal: 25-komisyon-farki }
+          - { no: 26, dal: 26-kampanya-tarihi }
+          - { no: 27, dal: 27-kargo-epostasi }
+          - { no: 28, dal: 28-kupon-sebebi }
+          - { no: 29, dal: 29-docker-api }
+          - { no: 30, dal: 30-urun-aciklamasi }
+          - { no: 31, dal: 31-gosterge-hatasi }
+          - { no: 32, dal: 32-iki-sekme }
     steps:
       - uses: actions/checkout@v4
         with:

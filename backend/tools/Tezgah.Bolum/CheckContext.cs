@@ -16,6 +16,7 @@ public class CheckContext(Repository repo)
     public string PaymentsUrl { get; } = Env("TEZGAH_PAYMENTS_URL", "http://localhost:5090");
     public string NotificationsUrl { get; } = Env("TEZGAH_NOTIFICATIONS_URL", "http://localhost:5095");
     public string StorefrontUrl { get; } = Env("TEZGAH_STOREFRONT_URL", "http://localhost:5173");
+    public string MailpitUrl { get; } = Env("TEZGAH_MAILPIT_URL", "http://localhost:8025");
     public string ConnectionString { get; } = Env("TEZGAH_DB", "Host=localhost;Port=5440;Database=tezgah;Username=tezgah;Password=tezgah");
     public string WebhookSecret { get; } = Env("TEZGAH_WEBHOOK_SECRET", "gelistirme-webhook-sirri-0123456789abcdef");
     public string NotificationsApiKey { get; } = Env("TEZGAH_NOTIFICATIONS_KEY", "gelistirme-bildirim-api-anahtari");

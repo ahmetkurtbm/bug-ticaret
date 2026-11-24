@@ -74,6 +74,13 @@ Aynı kontroller `main` dalında her zaman geçer.
 | 23 | [Ödemeye geç'e iki kez basınca iki sipariş açıldı](23-cift-siparis/KAYIT.md) | ● | Müşteri sitesi · Ödeme |
 | 24 | [Rapordaki ciro muhasebeyle tutmuyor](24-rapor-cirosu/KAYIT.md) | ●● | Yönetim paneli · Gösterge |
 | 25 | [Satıcı panelindeki komisyon birkaç kuruş farklı](25-komisyon-farki/KAYIT.md) | ●● | Satıcı paneli · Özet |
+| 26 | [1 Aralık'ı seçtim, kupon 30 Kasım'dan başlıyor](26-kampanya-tarihi/KAYIT.md) | ●● | Yönetim paneli · Kampanyalar |
+| 27 | ["Kargoya verildi" e-postası müşteriye gitmiyor](27-kargo-epostasi/KAYIT.md) | ●● | Satıcı paneli · Siparişler · E-postalar |
+| 28 | [Kupon kabul edilmiyor ama sebebi yazmıyor](28-kupon-sebebi/KAYIT.md) | ● | Müşteri sitesi · Sepet |
+| 29 | [API Docker'da açılmıyor, bilgisayarda çalışıyor](29-docker-api/KAYIT.md) | ●● | Docker |
+| 30 | [Bir ürün sayfası açılınca tuhaf bir uyarı penceresi çıkıyor](30-urun-aciklamasi/KAYIT.md) | ●● | Müşteri sitesi · Ürün sayfası |
+| 31 | [Yönetim göstergesi ara sıra hata veriyor](31-gosterge-hatasi/KAYIT.md) | ●●● | Yönetim paneli · Gösterge |
+| 32 | [İki sekme açıkken bir anda oturum kapanıyor](32-iki-sekme/KAYIT.md) | ●●● | Müşteri sitesi · Giriş |
 
 Seviye: ● ilk aylar · ●● ilk yıl · ●●● deneyimli geliştiricinin bile zorlandığı.
 

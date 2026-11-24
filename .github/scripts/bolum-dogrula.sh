@@ -18,11 +18,16 @@ stop_services
 docker compose --profile app down >/dev/null 2>&1 || true
 
 case "$NO" in
-  1|3)
-    # Bu iki bölüm sistemin tamamen container'da çalışmasını ister.
+  1|3|29)
+    # Bu bölümler sistemin tamamen container'da çalışmasını ister.
     docker compose --profile app up -d --build
-    wait_http http://localhost:5080/health || { docker compose logs api | tail -50; exit 1; }
-    for _ in $(seq 1 90); do docker compose logs seed 2>/dev/null | grep -q "Bitti\|zaten veri" && break; sleep 3; done
+    if wait_http http://localhost:5080/health; then
+      for _ in $(seq 1 90); do docker compose logs seed 2>/dev/null | grep -q "Bitti\|zaten veri" && break; sleep 3; done
+    else
+      docker compose logs api | tail -50
+      # Bölüm 29'da API'nin açılmaması hatanın kendisidir; sonucu kontrol aracı söyler.
+      [ "$NO" = 29 ] || exit 1
+    fi
     ;;
   *)
     docker compose up -d postgres redis rabbitmq mailpit

@@ -328,5 +328,97 @@
     "setup": [
       "Satıcı panelinde satici@tezgah.test ile özetteki komisyona bakın; kontrol aracı hakediş ekstresiyle karşılaştırır: kontrol 25"
     ]
+  },
+  {
+    "no": 26,
+    "code": "FE-15",
+    "slug": "kampanya-tarihi",
+    "title": "1 Aralık'ı seçtim, kupon 30 Kasım'dan başlıyor",
+    "titleEn": "Picked December 1, the coupon starts on November 30",
+    "level": 2,
+    "module": "Yönetim paneli · Kampanyalar",
+    "check": "b26",
+    "setup": [
+      "Yönetim panelinde admin@tezgah.test ile yeni bir kupon oluşturun; başlangıç ve bitiş gününe dikkat edin"
+    ]
+  },
+  {
+    "no": 27,
+    "code": "EŞ-03",
+    "slug": "kargo-epostasi",
+    "title": "\"Kargoya verildi\" e-postası müşteriye gitmiyor",
+    "titleEn": "The shipped email never reaches the customer",
+    "level": 2,
+    "module": "Satıcı paneli · Siparişler · E-postalar",
+    "check": "b27",
+    "setup": [
+      "Satıcı panelinde satici@tezgah.test ile ödenmiş bir siparişi kargoya verin; e-postalar: http://localhost:8025"
+    ]
+  },
+  {
+    "no": 28,
+    "code": "API-10",
+    "slug": "kupon-sebebi",
+    "title": "Kupon kabul edilmiyor ama sebebi yazmıyor",
+    "titleEn": "Coupon is rejected without a reason",
+    "level": 1,
+    "module": "Müşteri sitesi · Sepet",
+    "check": "b28",
+    "setup": [
+      "Müşteri sitesinde sepete ürün ekleyip var olmayan ya da süresi geçmiş bir kupon kodu deneyin"
+    ]
+  },
+  {
+    "no": 29,
+    "code": "ORT-06",
+    "slug": "docker-api",
+    "title": "API Docker'da açılmıyor, bilgisayarda çalışıyor",
+    "titleEn": "The API does not start in Docker but runs locally",
+    "level": 2,
+    "module": "Docker",
+    "check": "b29",
+    "setup": [
+      "Bu bölüm sistemin tamamen container'da çalışmasını ister: docker compose --profile app up -d --build",
+      "Codespaces'te de F5 yerine aynı komutu kullanın"
+    ]
+  },
+  {
+    "no": 30,
+    "code": "GÜV-05",
+    "slug": "urun-aciklamasi",
+    "title": "Bir ürün sayfası açılınca tuhaf bir uyarı penceresi çıkıyor",
+    "titleEn": "A strange alert pops up on a product page",
+    "level": 2,
+    "module": "Müşteri sitesi · Ürün sayfası",
+    "check": "b30",
+    "setup": [
+      "Hata kaydındaki adımlar satıcı panelinde ürün açıklamasını değiştirip yönetim panelinde onaylamayı içerir"
+    ]
+  },
+  {
+    "no": 31,
+    "code": "NET-04",
+    "slug": "gosterge-hatasi",
+    "title": "Yönetim göstergesi ara sıra hata veriyor",
+    "titleEn": "The admin dashboard fails now and then",
+    "level": 3,
+    "module": "Yönetim paneli · Gösterge",
+    "check": "b31",
+    "setup": [
+      "Hata tek kişiyle kolay görünmez; kontrol aracı göstergeyi aynı anda birçok kez açar: kontrol 31"
+    ]
+  },
+  {
+    "no": 32,
+    "code": "GÜV-02",
+    "slug": "iki-sekme",
+    "title": "İki sekme açıkken bir anda oturum kapanıyor",
+    "titleEn": "Session drops when two tabs are open",
+    "level": 3,
+    "module": "Müşteri sitesi · Giriş",
+    "check": "b32",
+    "setup": [
+      "Müşteri sitesini iki sekmede açık tutun; erişim süresi dolunca olan biteni izleyin (süreyi kısaltmak için hata kaydına bakın)"
+    ]
   }
 ]

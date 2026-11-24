@@ -41,6 +41,13 @@ public static partial class Checks
         "b23" => c => FrontendTestAsync(c, "storefront", "b23", "Ödeme düğmesine iki kez basınca hâlâ iki sipariş açılabiliyor."),
         "b24" => ReportRevenueAsync,
         "b25" => SellerCommissionAsync,
+        "b26" => c => FrontendTestAsync(c, "admin", "b26", "Kupon formunda seçilen gün hâlâ farklı bir güne kaydediliyor."),
+        "b27" => ShippedEmailAsync,
+        "b28" => CouponReasonAsync,
+        "b29" => ContainerApiAsync,
+        "b30" => c => FrontendTestAsync(c, "storefront", "b30", "Ürün açıklamasına yazılan kod hâlâ sayfada çalışıyor."),
+        "b31" => ConcurrentReportAsync,
+        "b32" => c => FrontendTestAsync(c, "storefront", "b32", "İki sekme açıkken oturum hâlâ kendiliğinden kapanıyor."),
         _ => throw new BolumException($"Bilinmeyen kontrol: {id}"),
     };
 
@@ -622,6 +629,131 @@ public static partial class Checks
         Output.Info($"Panel: {shown.ToString("N2", tr)} TL · hakediş ekstresi: {expected.ToString("N2", tr)} TL");
         if (shown == expected) { Output.Pass("Paneldeki komisyon hakediş ekstresiyle kuruşu kuruşuna aynı."); return true; }
         Output.Fail("Paneldeki komisyon hakediş ekstresiyle tutmuyor.");
+        return false;
+    }
+
+    // ------------------------------------------------------------------ Bölüm 27
+    private static async Task<bool> ShippedEmailAsync(CheckContext c)
+    {
+        if (!await c.ApiIsUpAsync()) return false;
+        var orderNumber = await c.ScalarAsync<string>("""
+            SELECT o.order_number FROM orders o
+             WHERE o.status = 2
+               AND EXISTS (SELECT 1 FROM order_items oi WHERE oi.order_id = o.id AND oi.seller_id = 1)
+               AND NOT EXISTS (SELECT 1 FROM shipments s WHERE s.order_id = o.id AND s.seller_id = 1)
+             ORDER BY o.paid_at DESC LIMIT 1
+            """);
+        if (orderNumber is null) { Output.Fail("Demo mağazanın kargoya verilecek ödenmiş siparişi kalmadı; örnek veriyi yeniden üretin."); return false; }
+
+        var seller = await c.RequireLoginAsync("satici@tezgah.test");
+        var tracking = "KONTROL" + Random.Shared.Next(10_000_000, 99_999_999);
+        var shipped = await seller.PostAsync($"/api/seller/orders/{orderNumber}/ship", new { carrier = "Aras Kargo", trackingNumber = tracking });
+        if (shipped.Status != 200) { Output.Fail($"Satıcı {orderNumber} siparişini kargoya veremedi."); return false; }
+        Output.Pass($"Satıcı {orderNumber} siparişini kargoya verdi.");
+
+        var query = Uri.EscapeDataString($"subject:\"{orderNumber}\"");
+        var deadline = DateTime.UtcNow.AddSeconds(45);
+        while (DateTime.UtcNow < deadline)
+        {
+            string body;
+            try
+            {
+                body = await c.Http.GetStringAsync($"{c.MailpitUrl}/api/v1/search?query={query}");
+            }
+            catch (HttpRequestException)
+            {
+                Output.Fail($"E-posta kutusuna ulaşılamadı ({c.MailpitUrl}).");
+                return false;
+            }
+            var messages = JsonNode.Parse(body)?["messages"]?.AsArray() ?? [];
+            if (messages.Any(m => m?["Subject"]?.ToString().Contains("kargoya", StringComparison.OrdinalIgnoreCase) == true))
+            {
+                Output.Pass("Müşteriye \"kargoya verildi\" e-postası gitti.");
+                return true;
+            }
+            await Task.Delay(2000);
+        }
+        Output.Fail("Sipariş kargoya verildi ama müşteriye \"kargoya verildi\" e-postası gelmedi.");
+        return false;
+    }
+
+    // ------------------------------------------------------------------ Bölüm 28
+    private static async Task<bool> CouponReasonAsync(CheckContext c)
+    {
+        if (!await c.ApiIsUpAsync()) return false;
+        var session = await c.RequireLoginAsync("musteri@tezgah.test");
+        var variant = await c.FindSellableVariantAsync(2);
+        if (!await session.PrepareCartAsync(variant, 1)) { Output.Fail("Ürün sepete eklenemedi."); return false; }
+
+        var cases = new List<(string Code, string Expected, string Label)> { ("YOKBOYLEKUPON", "coupon_not_found", "Olmayan bir kod") };
+        var expired = await c.ScalarAsync<string>("SELECT code FROM coupons WHERE is_active AND ends_at < now() ORDER BY ends_at DESC LIMIT 1");
+        if (expired is not null) cases.Add((expired, "coupon_expired", "Süresi geçmiş bir kupon"));
+
+        var ok = true;
+        foreach (var (code, expected, label) in cases)
+        {
+            var result = await session.PutAsync("/api/cart/coupon", new { couponCode = code });
+            var title = result.Body?["title"]?.ToString();
+            if (result.Status == 400 && result.Body?["code"]?.ToString() == expected)
+                Output.Pass($"{label} girildiğinde müşteri sebebi görüyor: \"{title}\"");
+            else
+            {
+                Output.Fail($"{label} girildiğinde müşteri sebebi göremiyor; gördüğü: \"{title}\"");
+                ok = false;
+            }
+        }
+        await session.DeleteAsync("/api/cart/coupon");
+        return ok;
+    }
+
+    // ------------------------------------------------------------------ Bölüm 29
+    private static async Task<bool> ContainerApiAsync(CheckContext c)
+    {
+        var ps = Shell.Run("docker", "compose --profile app ps -a --format {{.Service}}:{{.State}}", c.Repo.Root);
+        if (!ps.Output.Contains("api:"))
+        {
+            Output.Fail("Bu bölüm sistemin container'da çalışmasını ister: docker compose --profile app up -d --build");
+            return false;
+        }
+        // Açılıp hemen kapanan container'ı yakalamak için kısa bir süre bekler.
+        await Task.Delay(TimeSpan.FromSeconds(5));
+        ps = Shell.Run("docker", "compose --profile app ps -a --format {{.Service}}:{{.State}}", c.Repo.Root);
+        if (!ps.Output.Contains("api:running"))
+        {
+            Output.Fail("API container'ı açıldıktan hemen sonra kapanıyor; siteler veri alamıyor.");
+            return false;
+        }
+        Output.Pass("API container'ı çalışıyor.");
+        if (!await c.ApiIsUpAsync()) return false;
+
+        using var response = await c.Http.GetAsync($"{c.ApiUrl}/api/categories");
+        if (!response.IsSuccessStatusCode) { Output.Fail("API çalışıyor ama kategoriler gelmiyor."); return false; }
+        Output.Pass("Container'daki API istekleri yanıtlıyor.");
+        return true;
+    }
+
+    // ------------------------------------------------------------------ Bölüm 31
+    private static async Task<bool> ConcurrentReportAsync(CheckContext c)
+    {
+        if (!await c.ApiIsUpAsync()) return false;
+        var admin = await c.RequireLoginAsync("admin@tezgah.test");
+        var single = await admin.GetAsync("/api/admin/reports/sales");
+        if (single.Status != 200) { Output.Fail("Satış raporu tek başına da açılmıyor."); return false; }
+        Output.Pass("Gösterge tek kişi açınca sorunsuz.");
+
+        // Sabah toplantısı: birkaç kişi göstergeyi aynı anda açıyor.
+        var failures = 0;
+        for (var round = 0; round < 3; round++)
+        {
+            var results = await Task.WhenAll(Enumerable.Range(0, 12).Select(_ => admin.GetAsync("/api/admin/reports/sales")));
+            failures += results.Count(r => r.Status != 200);
+        }
+        if (failures == 0)
+        {
+            Output.Pass("Gösterge aynı anda 36 kez açıldı, hepsi sorunsuz.");
+            return true;
+        }
+        Output.Fail($"Gösterge aynı anda 36 kez açıldı, {failures} tanesinde hata sayfası geldi.");
         return false;
     }
 }
