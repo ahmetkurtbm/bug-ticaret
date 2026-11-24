@@ -40,6 +40,12 @@ jobs:
           - { no: 17, dal: 17-siparislerim-yavas }
           - { no: 18, dal: 18-son-urun }
           - { no: 19, dal: 19-stok-dusumu }
+          - { no: 20, dal: 20-baska-musterinin-siparisi }
+          - { no: 21, dal: 21-yeni-adres }
+          - { no: 22, dal: 22-kupon-kaydedilmedi }
+          - { no: 23, dal: 23-cift-siparis }
+          - { no: 24, dal: 24-rapor-cirosu }
+          - { no: 25, dal: 25-komisyon-farki }
     steps:
       - uses: actions/checkout@v4
         with:

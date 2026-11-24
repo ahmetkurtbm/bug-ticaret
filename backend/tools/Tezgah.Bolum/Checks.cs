@@ -35,6 +35,12 @@ public static partial class Checks
         "db01" => OrderHistoryPlanAsync,
         "es01" => LastStockRaceAsync,
         "es02" => DuplicateWebhookAsync,
+        "b20" => OtherCustomersOrderAsync,
+        "b21" => c => FrontendTestAsync(c, "storefront", "b21", "Yeni eklenen adres hâlâ listede görünmüyor."),
+        "b22" => DuplicateCouponAsync,
+        "b23" => c => FrontendTestAsync(c, "storefront", "b23", "Ödeme düğmesine iki kez basınca hâlâ iki sipariş açılabiliyor."),
+        "b24" => ReportRevenueAsync,
+        "b25" => SellerCommissionAsync,
         _ => throw new BolumException($"Bilinmeyen kontrol: {id}"),
     };
 
@@ -510,5 +516,112 @@ public static partial class Checks
             await c.ExecuteAsync("UPDATE stock_items SET quantity = @q, reserved = @r WHERE id = @id",
                 ("q", original[0] - 2), ("r", original[1]), ("id", stockItemId));
         }
+    }
+
+    // ------------------------------------------------------------------ Bölüm 20
+    private static async Task<bool> OtherCustomersOrderAsync(CheckContext c)
+    {
+        if (!await c.ApiIsUpAsync()) return false;
+        var orderNumber = await c.ScalarAsync<string>("""
+            SELECT o.order_number FROM orders o JOIN users u ON u.id = o.user_id
+             WHERE u.email = 'musteri@tezgah.test' ORDER BY o.placed_at LIMIT 1
+            """);
+        if (orderNumber is null) { Output.Fail("Kontrol için gereken örnek veri bulunamadı; örnek veriyi yeniden üretin."); return false; }
+
+        var owner = await c.RequireLoginAsync("musteri@tezgah.test");
+        var own = await owner.GetAsync($"/api/orders/{orderNumber}");
+        if (own.Status != 200) { Output.Fail("Müşteri kendi siparişini açamıyor."); return false; }
+        Output.Pass("Müşteri kendi siparişini açabiliyor.");
+
+        var otherEmail = (await c.CustomerEmailsAsync(3)).First(e => e != "musteri@tezgah.test");
+        var other = await c.RequireLoginAsync(otherEmail);
+        var foreign = await other.GetAsync($"/api/orders/{orderNumber}");
+        if (foreign.Status == 404)
+        {
+            Output.Pass("Başka bir müşteri bu siparişi açamıyor.");
+            return true;
+        }
+        Output.Fail("Başka bir müşteri, kendisine ait olmayan bir siparişin ayrıntılarını (adres, ürünler, tutar) görebiliyor.");
+        return false;
+    }
+
+    // ------------------------------------------------------------------ Bölüm 22
+    private static async Task<bool> DuplicateCouponAsync(CheckContext c)
+    {
+        if (!await c.ApiIsUpAsync()) return false;
+        var admin = await c.RequireLoginAsync("admin@tezgah.test");
+        var before = await c.ScalarAsync<long>("SELECT count(*) FROM coupons");
+        var created = await admin.PostAsync("/api/admin/coupons", new
+        {
+            code = "KARGOBEDAVA", description = "Bölüm kontrolü", type = 1, value = 10, minOrderAmount = 0,
+            startsOn = "2026-12-01", endsOn = "2026-12-02",
+        });
+        var after = await c.ScalarAsync<long>("SELECT count(*) FROM coupons");
+        if (after != before) { Output.Fail("Var olan bir kodla ikinci kupon oluştu."); return false; }
+
+        if (created.Status is >= 400 and < 500 && created.Body?["errors"] is not null)
+        {
+            Output.Pass("Kupon kaydedilemediğinde panel bunu hata olarak alıyor ve sebebi görebiliyor.");
+            return true;
+        }
+        Output.Fail("Kupon kaydedilmediği hâlde panel işlemi başarılı sanıyor.");
+        return false;
+    }
+
+    // ------------------------------------------------------------------ Bölüm 24
+    private static async Task<bool> ReportRevenueAsync(CheckContext c)
+    {
+        if (!await c.ApiIsUpAsync()) return false;
+        var admin = await c.RequireLoginAsync("admin@tezgah.test");
+        var report = await admin.GetAsync("/api/admin/reports/sales?from=2026-01-01&to=2026-12-31");
+        if (report.Status != 200) { Output.Fail("Satış raporu açılmıyor."); return false; }
+        var revenue = decimal.Parse(report.Body!["summary"]!["revenue"]!.ToString(), CultureInfo.InvariantCulture);
+        var orders = report.Body["summary"]!["orderCount"]!.GetValue<int>();
+
+        // Muhasebenin hesabı: ödemesi alınmış siparişlerin genel toplamı (İstanbul takvimiyle 2026).
+        var expected = await c.ScalarAsync<decimal>("""
+            SELECT coalesce(sum(grand_total), 0) FROM orders
+             WHERE status IN (2,3,4,5)
+               AND paid_at >= ('2026-01-01'::timestamp AT TIME ZONE 'Europe/Istanbul')
+               AND paid_at <  ('2027-01-01'::timestamp AT TIME ZONE 'Europe/Istanbul')
+            """);
+        var expectedOrders = await c.ScalarAsync<long>("""
+            SELECT count(*) FROM orders
+             WHERE status IN (2,3,4,5)
+               AND paid_at >= ('2026-01-01'::timestamp AT TIME ZONE 'Europe/Istanbul')
+               AND paid_at <  ('2027-01-01'::timestamp AT TIME ZONE 'Europe/Istanbul')
+            """);
+        var ok = true;
+        if (orders == expectedOrders) Output.Pass("Rapordaki sipariş sayısı doğru.");
+        else { Output.Fail("Rapordaki sipariş sayısı muhasebe kayıtlarıyla tutmuyor."); ok = false; }
+        if (revenue == expected) Output.Pass("Rapordaki ciro muhasebe kayıtlarıyla aynı.");
+        else { Output.Fail($"Rapordaki ciro ({revenue.ToString("N2", CultureInfo.GetCultureInfo("tr-TR"))} TL) muhasebe kayıtlarıyla ({expected.ToString("N2", CultureInfo.GetCultureInfo("tr-TR"))} TL) tutmuyor."); ok = false; }
+        return ok;
+    }
+
+    // ------------------------------------------------------------------ Bölüm 25
+    private static async Task<bool> SellerCommissionAsync(CheckContext c)
+    {
+        if (!await c.ApiIsUpAsync()) return false;
+        var seller = await c.RequireLoginAsync("satici@tezgah.test");
+        var dashboard = await seller.GetAsync("/api/seller/dashboard");
+        if (dashboard.Status != 200) { Output.Fail("Satıcı paneli özeti açılmıyor."); return false; }
+        var shown = decimal.Parse(dashboard.Body!["last30DaysCommission"]!.ToString(), CultureInfo.InvariantCulture);
+
+        // Hakediş ekstresinin hesabı: her satırın komisyonu kuruşa yuvarlanır, sonra toplanır.
+        var istanbul = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+        var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTimeOffset.UtcNow, istanbul).Date);
+        var fromLocal = today.AddDays(-29).ToDateTime(TimeOnly.MinValue);
+        var from = new DateTimeOffset(fromLocal, istanbul.GetUtcOffset(fromLocal)).ToUniversalTime();
+        var expected = await c.ScalarAsync<decimal>("""
+            SELECT coalesce(sum(round(oi.line_total * oi.commission_rate / 100, 2)), 0)
+              FROM order_items oi JOIN orders o ON o.id = oi.order_id
+             WHERE oi.seller_id = 1 AND o.paid_at >= @from AND o.status NOT IN (6, 7)
+            """, ("from", from));
+        var tr = CultureInfo.GetCultureInfo("tr-TR");
+        Output.Info($"Panel: {shown.ToString("N2", tr)} TL · hakediş ekstresi: {expected.ToString("N2", tr)} TL");
+        if (shown == expected) { Output.Pass("Paneldeki komisyon hakediş ekstresiyle kuruşu kuruşuna aynı."); return true; }
+        Output.Fail("Paneldeki komisyon hakediş ekstresiyle tutmuyor.");
+        return false;
     }
 }

@@ -250,5 +250,83 @@
     "setup": [
       "Sorun yoğun saatlerde görülüyor. O anki trafiği canlandırmak için kontrol aracını çalıştırın: kontrol 19"
     ]
+  },
+  {
+    "no": 20,
+    "code": "GÜV-04",
+    "slug": "baska-musterinin-siparisi",
+    "title": "Başka bir müşterinin siparişi açılabiliyor",
+    "titleEn": "Another customer's order can be opened",
+    "level": 1,
+    "module": "Müşteri sitesi · Siparişlerim",
+    "check": "b20",
+    "setup": [
+      "Hata kaydındaki güvenlik ekibi notunu okuyun; iki farklı müşteri hesabıyla deneyin"
+    ]
+  },
+  {
+    "no": 21,
+    "code": "FE-16",
+    "slug": "yeni-adres",
+    "title": "Yeni eklenen adres listede görünmüyor",
+    "titleEn": "A newly added address does not appear in the list",
+    "level": 1,
+    "module": "Müşteri sitesi · Ödeme",
+    "check": "b21",
+    "setup": [
+      "Müşteri sitesinde sepete ürün ekleyip ödeme sayfasında yeni bir adres ekleyin"
+    ]
+  },
+  {
+    "no": 22,
+    "code": "API-11",
+    "slug": "kupon-kaydedilmedi",
+    "title": "Kupon \"kaydedildi\" dedi ama listede yok",
+    "titleEn": "Coupon says saved but is not in the list",
+    "level": 1,
+    "module": "Yönetim paneli · Kampanyalar",
+    "check": "b22",
+    "setup": [
+      "Yönetim panelinde admin@tezgah.test ile KARGOBEDAVA koduyla yeni bir kupon oluşturmayı deneyin"
+    ]
+  },
+  {
+    "no": 23,
+    "code": "FE-10",
+    "slug": "cift-siparis",
+    "title": "Ödemeye geç'e iki kez basınca iki sipariş açıldı",
+    "titleEn": "Two orders were created after a double click",
+    "level": 1,
+    "module": "Müşteri sitesi · Ödeme",
+    "check": "b23",
+    "setup": [
+      "Müşteri sitesinde ödeme sayfasında \"Ödemeye geç\" düğmesine hızlıca iki kez basın, sonra Siparişlerim'e bakın"
+    ]
+  },
+  {
+    "no": 24,
+    "code": "DB-07",
+    "slug": "rapor-cirosu",
+    "title": "Rapordaki ciro muhasebeyle tutmuyor",
+    "titleEn": "Report revenue does not match accounting",
+    "level": 2,
+    "module": "Yönetim paneli · Gösterge",
+    "check": "b24",
+    "setup": [
+      "Yönetim panelinin göstergesinde ciroyu not alın; hata kaydındaki muhasebe rakamıyla karşılaştırın"
+    ]
+  },
+  {
+    "no": 25,
+    "code": "NET-17",
+    "slug": "komisyon-farki",
+    "title": "Satıcı panelindeki komisyon birkaç kuruş farklı",
+    "titleEn": "Seller panel commission is off by a few cents",
+    "level": 2,
+    "module": "Satıcı paneli · Özet",
+    "check": "b25",
+    "setup": [
+      "Satıcı panelinde satici@tezgah.test ile özetteki komisyona bakın; kontrol aracı hakediş ekstresiyle karşılaştırır: kontrol 25"
+    ]
   }
 ]

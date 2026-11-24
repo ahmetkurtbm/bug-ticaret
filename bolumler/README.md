@@ -68,6 +68,12 @@ Aynı kontroller `main` dalında her zaman geçer.
 | 17 | [Siparişlerim sayfası saniyelerce bekliyor](17-siparislerim-yavas/KAYIT.md) | ●●● | Müşteri sitesi · Siparişlerim |
 | 18 | [Son ürün iki müşteriye satıldı](18-son-urun/KAYIT.md) | ●●● | Müşteri sitesi · Sipariş |
 | 19 | [Bazı siparişlerde stok iki kez düşmüş](19-stok-dusumu/KAYIT.md) | ●●● | Sipariş · Stok |
+| 20 | [Başka bir müşterinin siparişi açılabiliyor](20-baska-musterinin-siparisi/KAYIT.md) | ● | Müşteri sitesi · Siparişlerim |
+| 21 | [Yeni eklenen adres listede görünmüyor](21-yeni-adres/KAYIT.md) | ● | Müşteri sitesi · Ödeme |
+| 22 | [Kupon "kaydedildi" dedi ama listede yok](22-kupon-kaydedilmedi/KAYIT.md) | ● | Yönetim paneli · Kampanyalar |
+| 23 | [Ödemeye geç'e iki kez basınca iki sipariş açıldı](23-cift-siparis/KAYIT.md) | ● | Müşteri sitesi · Ödeme |
+| 24 | [Rapordaki ciro muhasebeyle tutmuyor](24-rapor-cirosu/KAYIT.md) | ●● | Yönetim paneli · Gösterge |
+| 25 | [Satıcı panelindeki komisyon birkaç kuruş farklı](25-komisyon-farki/KAYIT.md) | ●● | Satıcı paneli · Özet |
 
 Seviye: ● ilk aylar · ●● ilk yıl · ●●● deneyimli geliştiricinin bile zorlandığı.
 
