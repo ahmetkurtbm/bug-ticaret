@@ -45,9 +45,6 @@ async function refreshTokens(): Promise<boolean> {
         body: JSON.stringify({ refreshToken }),
       })
       if (!response.ok) {
-        // Başka bir sekme aynı anda yenilemiş olabilir: bu anahtar artık geçersizdir ama depoda yenisi vardır.
-        const latest = tokenStore.reload()
-        if (latest && latest.refreshToken !== refreshToken) return true
         tokenStore.clear()
         return false
       }

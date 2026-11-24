@@ -15,23 +15,11 @@ function read(): AuthResponse | null {
 
 let current = read()
 
-// Başka bir sekme oturumu yenileyince ya da çıkış yapınca bu sekme de aynı oturumu görür.
-if (typeof window !== 'undefined') {
-  window.addEventListener('storage', (event) => {
-    if (event.key !== KEY && event.key !== null) return
-    current = read()
-    listeners.forEach((l) => l(current))
-  })
-}
+
 
 /** Oturum bilgisi. React dışındaki API istemcisi de buradan okur. */
 export const tokenStore = {
   get: () => current,
-  /** Depodaki son oturumu yeniden okur (başka bir sekmenin yazdığı dahil). */
-  reload() {
-    current = read()
-    return current
-  },
   set(session: AuthResponse) {
     current = session
     localStorage.setItem(KEY, JSON.stringify(session))
